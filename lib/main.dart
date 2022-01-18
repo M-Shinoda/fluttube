@@ -35,12 +35,24 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final myController = TextEditingController();
+
+  List<Map<String, dynamic>> items = [];
+
   int _counter = 0;
 
-  void _incrementCounter() {
+  void _addItem(String title) {
     setState(() {
       _counter++;
+      items.add({"id": _counter, "title": title});
     });
+  }
+
+  @override
+  // widgetの破棄時にコントローラも破棄する
+  void dispose() {
+    myController.dispose();
+    super.dispose();
   }
 
   @override
@@ -55,29 +67,51 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      body: Center(
+      body: Container(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          // mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            // リストビュー
+            Expanded(
+              child: ListView.builder(
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemCount: items.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final item = items[index];
+
+                  return new Card(
+                    child: ListTile(
+                      leading: Icon(Icons.people),
+                      title: Text(
+                        item["id"].toString() + " : " + item["title"],
+                        style: TextStyle(
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      trailing: CircularProgressIndicator(),
+                    ),
+                  );
+                },
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+            FloatingActionButton(
+              // onPressedでボタンが押されたらテキストフィールドの内容を取得して、アイテムに追加
+              onPressed: () async {
+                final title = await download();
+                _addItem(title);
+                // テキストフィールドの内容をクリア
+                myController.clear();
+              },
+              child: Icon(Icons.add),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
     );
   }
 
-  void download() async {
+  Future<String> download() async {
     var yt = YoutubeExplode();
     var id = VideoId(
         'https://www.youtube.com/watch?v=x0aoBUeCcC8&list=PLwJaZiXeTyFx4RNld3IciTHae59jlxVRS&index=55');
@@ -110,6 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
         .replaceAll('<', '')
         .replaceAll('>', '')
         .replaceAll('|', '');
+    return fileName;
     var filePath =
         // path.join(dirM.path, '${video.id}.${audio.container.name}');
         path.join(dirM.path, fileName);
