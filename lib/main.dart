@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -6,6 +7,7 @@ import 'package:downloads_path_provider/downloads_path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,11 +37,38 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  late StreamSubscription _intentDataStreamSubscription;
+  String? _sharedText;
   int _counter = 0;
 
   void _incrementCounter() {
     setState(() {
       _counter++;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // For sharing or opening urls/text coming from outside the app while the app is in the memory
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getTextStream().listen((String value) {
+      setState(() {
+        _sharedText = value;
+        print("Shared: $_sharedText");
+      });
+      download(_sharedText);
+    }, onError: (err) {
+      print("getLinkStream error: $err");
+    });
+
+    // For sharing or opening urls/text coming from outside the app while the app is closed
+    ReceiveSharingIntent.getInitialText().then((String? value) {
+      setState(() {
+        _sharedText = value;
+        print("Shared: $_sharedText");
+      });
+      download(_sharedText);
     });
   }
 
@@ -77,10 +106,13 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void download() async {
+  void download([String? url]) async {
     var yt = YoutubeExplode();
-    var id = VideoId(
-        'https://www.youtube.com/watch?v=x0aoBUeCcC8&list=PLwJaZiXeTyFx4RNld3IciTHae59jlxVRS&index=55');
+    if (url == null) {
+      url =
+          'https://www.youtube.com/watch?v=x0aoBUeCcC8&list=PLwJaZiXeTyFx4RNld3IciTHae59jlxVRS&index=55';
+    }
+    var id = VideoId(url);
     var video = await yt.videos.get(id);
     await showDialog(
       context: context,
