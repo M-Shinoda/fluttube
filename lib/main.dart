@@ -39,11 +39,16 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late StreamSubscription _intentDataStreamSubscription;
   String? _sharedText;
+  final myController = TextEditingController();
+
+  List<Map<String, dynamic>> items = [];
+
   int _counter = 0;
 
-  void _incrementCounter() {
+  void _addItem(String title) {
     setState(() {
       _counter++;
+      items.add({"id": _counter, "title": title});
     });
   }
 
@@ -52,25 +57,31 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     // For sharing or opening urls/text coming from outside the app while the app is in the memory
     _intentDataStreamSubscription =
-        ReceiveSharingIntent.getTextStream().listen((String value) {
+        ReceiveSharingIntent.getTextStream().listen((String value) async {
       setState(() {
         _sharedText = value;
         print("Shared: $_sharedText");
       });
-      download(_sharedText);
+      await download(_sharedText);
     }, onError: (err) {
       print("getLinkStream error: $err");
     });
 
     // For sharing or opening urls/text coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialText().then((String? value) {
+    ReceiveSharingIntent.getInitialText().then((String? value) async {
       if (value == null) return;
       setState(() {
         _sharedText = value;
         print("Shared: $_sharedText");
       });
-      download(_sharedText);
+      await download(_sharedText);
     });
+  }
+
+  // widgetの破棄時にコントローラも破棄する
+  void dispose() {
+    myController.dispose();
+    super.dispose();
   }
 
   @override
@@ -80,34 +91,56 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
         actions: <Widget>[
           IconButton(
-            onPressed: download,
+            onPressed: () => download(),
             icon: const Icon(CupertinoIcons.cloud_download),
           )
         ],
       ),
-      body: Center(
+      body: Container(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          // mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            // リストビュー
+            Expanded(
+              child: ListView.builder(
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemCount: items.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final item = items[index];
+
+                  return new Card(
+                    child: ListTile(
+                      leading: Icon(Icons.people),
+                      title: Text(
+                        item["id"].toString() + " : " + item["title"],
+                        style: TextStyle(
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      trailing: CircularProgressIndicator(),
+                    ),
+                  );
+                },
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+            FloatingActionButton(
+              // onPressedでボタンが押されたらテキストフィールドの内容を取得して、アイテムに追加
+              onPressed: () async {
+                final title = await download();
+                _addItem(title);
+                // テキストフィールドの内容をクリア
+                myController.clear();
+              },
+              child: Icon(Icons.add),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
     );
   }
 
-  void download([String? url]) async {
+  Future<String> download([String? url]) async {
     var yt = YoutubeExplode();
     if (url == null) {
       url =
@@ -143,6 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
         .replaceAll('<', '')
         .replaceAll('>', '')
         .replaceAll('|', '');
+    return fileName;
     var filePath =
         // path.join(dirM.path, '${video.id}.${audio.container.name}');
         path.join(dirM.path, fileName);
