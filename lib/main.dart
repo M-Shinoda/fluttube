@@ -64,6 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // For sharing or opening urls/text coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialText().then((String? value) {
+      if (value == null) return;
       setState(() {
         _sharedText = value;
         print("Shared: $_sharedText");
