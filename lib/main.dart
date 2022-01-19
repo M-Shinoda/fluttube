@@ -3,8 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:downloads_path_provider/downloads_path_provider.dart';
 import 'package:path/path.dart' as path;
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:permission_handler/permission_handler.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -45,40 +47,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   int _counter = 0;
 
-  void _addItem(String title) {
-    setState(() {
-      _counter++;
-      items.add({"id": _counter, "title": title});
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // For sharing or opening urls/text coming from outside the app while the app is in the memory
-    _intentDataStreamSubscription =
-        ReceiveSharingIntent.getTextStream().listen((String value) async {
-      setState(() {
-        _sharedText = value;
-        print("Shared: $_sharedText");
-      });
-      await download(_sharedText);
-    }, onError: (err) {
-      print("getLinkStream error: $err");
-    });
-
-    // For sharing or opening urls/text coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialText().then((String? value) async {
-      if (value == null) return;
-      setState(() {
-        _sharedText = value;
-        print("Shared: $_sharedText");
-      });
-      await download(_sharedText);
-    });
-  }
-
   // widgetの破棄時にコントローラも破棄する
+  @override
   void dispose() {
     myController.dispose();
     super.dispose();
@@ -109,16 +79,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemBuilder: (BuildContext context, int index) {
                   final item = items[index];
 
-                  return new Card(
+                  return Card(
                     child: ListTile(
-                      leading: Icon(Icons.people),
+                      leading: const Icon(Icons.people),
                       title: Text(
                         item["id"].toString() + " : " + item["title"],
-                        style: TextStyle(
+                        style: const TextStyle(
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      trailing: CircularProgressIndicator(),
+                      trailing: const CircularProgressIndicator(),
                     ),
                   );
                 },
@@ -132,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 // テキストフィールドの内容をクリア
                 myController.clear();
               },
-              child: Icon(Icons.add),
+              child: const Icon(Icons.add),
             ),
           ],
         ),
@@ -140,12 +110,46 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+    // For sharing or opening urls/text coming from outside the app while the app is in the memory
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getTextStream().listen((String value) async {
+      setState(() {
+        _sharedText = value;
+        // ignore: avoid_print
+        print("Shared: $_sharedText");
+      });
+      await download(_sharedText);
+    }, onError: (err) {
+      // ignore: avoid_print
+      print("getLinkStream error: $err");
+    });
+
+    // For sharing or opening urls/text coming from outside the app while the app is closed
+    ReceiveSharingIntent.getInitialText().then((String? value) async {
+      if (value == null) return;
+      setState(() {
+        _sharedText = value;
+        // ignore: avoid_print
+        print("Shared: $_sharedText");
+      });
+      await download(_sharedText);
+    });
+  }
+
+  void _addItem(String title) {
+    setState(() {
+      _counter++;
+      items.add({"id": _counter, "title": title});
+    });
+  }
+
   Future<String> download([String? url]) async {
     var yt = YoutubeExplode();
-    if (url == null) {
-      url =
-          'https://www.youtube.com/watch?v=x0aoBUeCcC8&list=PLwJaZiXeTyFx4RNld3IciTHae59jlxVRS&index=55';
-    }
+    url ??=
+        'https://www.youtube.com/watch?v=x0aoBUeCcC8&list=PLwJaZiXeTyFx4RNld3IciTHae59jlxVRS&index=55';
     var id = VideoId(url);
     var video = await yt.videos.get(id);
     await showDialog(
