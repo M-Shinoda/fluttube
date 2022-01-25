@@ -1,14 +1,7 @@
 import 'dart:async';
-// import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-// ignore: import_of_legacy_library_into_null_safe
-// import 'package:fluttube/list_card.dart';
-// import 'package:fluttube/share_receive_url.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-// import 'downloader.dart';
-// import 'share_receive_url.dart';]
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
