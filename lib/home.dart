@@ -12,19 +12,18 @@ class HomeView extends HookConsumerWidget {
     final count = ref.watch(countProvider);
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Fluttube '),
-          actions: <Widget>[
-            IconButton(
-              onPressed: () {
-                print('$count');
-              },
-              icon: const Icon(CupertinoIcons.cloud_download),
-            )
-          ],
-        ),
-        body: Row(
-          children: [Text('$count'), HomeBodyView()],
-        ));
+      appBar: AppBar(
+        title: const Text('Fluttube '),
+        actions: <Widget>[
+          IconButton(
+            onPressed: () {
+              print('$count');
+            },
+            icon: const Icon(CupertinoIcons.cloud_download),
+          )
+        ],
+      ),
+      body: HomeBodyView(),
+    );
   }
 }
