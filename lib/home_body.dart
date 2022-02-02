@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttube/count.dart';
 import 'package:fluttube/download_list.dart';
+import 'package:fluttube/list_card.dart';
 import 'package:fluttube/url.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path/path.dart';
@@ -19,12 +20,12 @@ class HomeBodyView extends HookConsumerWidget {
     return Container(
       child: Column(
         children: <Widget>[
-          Text('$count'),
-          Text('$url'),
-          // Text(dList),
-          Text(dList.isNotEmpty ? dList.last.url : 'ffff'),
+          // Text('$count'),
+          // Text('$url'),
+          // Text('$dList'),
+          Text(dList.isNotEmpty ? dList.last.url : 'No data'),
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 30),
+            margin: const EdgeInsets.symmetric(horizontal: 30),
             child: TextField(
               onChanged: (value) {
                 urlNotifier.update(value);
@@ -32,15 +33,18 @@ class HomeBodyView extends HookConsumerWidget {
             ),
           ),
           ElevatedButton(
-              onPressed: () {
-                dListNotifier.setUrl(url);
-                dList.forEach((e) {
-                  print(e.url);
-                });
-                print(dList.length);
-              },
-              child: const Text('Download')),
-          Expanded(child: Container()),
+            onPressed: () {
+              dListNotifier.setUrl(url);
+              dList.forEach((e) {
+                // print(e.url);
+              });
+              print(dList.length);
+            },
+            child: const Text('Download'),
+          ),
+          Expanded(
+            child: ListCard(items: dList),
+          ),
           FloatingActionButton(
             onPressed: () {
               print('touch floating button');

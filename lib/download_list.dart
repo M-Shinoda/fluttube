@@ -1,24 +1,22 @@
-import 'dart:ffi';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class UrlListState {
+class UrlStateList {
   String url;
   String completed;
-  UrlListState(this.url, this.completed);
+  UrlStateList(this.url, this.completed);
 }
 
 final downloadListProvider =
-    StateNotifierProvider<DownloadListStateNotifier, List<UrlListState>>((_) {
+    StateNotifierProvider<DownloadListStateNotifier, List<UrlStateList>>((_) {
   return DownloadListStateNotifier();
 });
 
-List<UrlListState> list = [];
+List<UrlStateList> list = [];
 
-class DownloadListStateNotifier extends StateNotifier<List<UrlListState>> {
-  DownloadListStateNotifier() : super(<UrlListState>[]);
+class DownloadListStateNotifier extends StateNotifier<List<UrlStateList>> {
+  DownloadListStateNotifier() : super(<UrlStateList>[]);
   void setUrl(String url) {
-    list.add(UrlListState(url, 'false'));
-    state = list;
+    list.add(UrlStateList(url, 'false'));
+    state = list.toList();
   }
 }

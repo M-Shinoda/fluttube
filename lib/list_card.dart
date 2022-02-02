@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:fluttube/download_list.dart';
 
 class ListCard extends StatefulWidget {
   const ListCard({Key? key, required this.items}) : super(key: key);
-  final List<Map<String, dynamic>> items;
+  final List<UrlStateList> items;
 
   @override
   State<ListCard> createState() => _ListCard();
 }
 
 class _ListCard extends State<ListCard> {
+  List<Map<String, dynamic>> dones = [];
+  @override
+  void initState() {
+    super.initState();
+    print('initState ########');
+  }
+
+  @override
+  void didUpdateWidget(covariant ListCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    print('didUpdateWidget');
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -22,7 +36,7 @@ class _ListCard extends State<ListCard> {
           child: ListTile(
             leading: const Icon(Icons.people),
             title: Text(
-              item["id"].toString() + " : " + item["title"],
+              item.url.toString() + " : " + item.completed,
               style: const TextStyle(
                 overflow: TextOverflow.ellipsis,
               ),
