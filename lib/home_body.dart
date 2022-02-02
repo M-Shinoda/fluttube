@@ -63,16 +63,17 @@ class HomeBodyView extends HookConsumerWidget {
               ),
               Expanded(
                 child: TextButton(
-                    onPressed: () {
-                      // conditionList =
-                      //     dListNotifier.getConditionList(false).toList();
-                      condition = false;
-                      dListNotifier.setDisplayList(false);
-                    },
-                    child: Text("ダウンロード中"),
-                    style: TextButton.styleFrom(
-                        backgroundColor:
-                            dList.condition ? null : Colors.orange[100])),
+                  onPressed: () {
+                    // conditionList =
+                    //     dListNotifier.getConditionList(false).toList();
+                    condition = false;
+                    dListNotifier.setDisplayList(false);
+                  },
+                  child: Text("ダウンロード中"),
+                  style: TextButton.styleFrom(
+                      backgroundColor:
+                          dList.condition ? null : Colors.orange[100]),
+                ),
               ),
             ],
           ),
