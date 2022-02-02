@@ -22,12 +22,6 @@ class HomeBodyView extends HookConsumerWidget {
     return Container(
       child: Column(
         children: <Widget>[
-          // Text('$count'),
-          // Text('$url'),
-          // Text('$dList'),
-          Text(dList.displayList.isNotEmpty
-              ? dList.displayList.last.url
-              : 'No data'),
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 30),
             child: TextField(
