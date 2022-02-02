@@ -28,7 +28,7 @@ class DownloadListStateNotifier extends StateNotifier<UrlStates> {
   DownloadListStateNotifier() : super(UrlStates(incompList, condition));
   void setUrl(String url) {
     incompList.add(UrlState(url, false));
-    state = UrlStates(incompList, condition);
+    state = UrlStates(incompList, false);
   }
 
   void setDisplayList(bool nextCondition) {
