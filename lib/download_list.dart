@@ -6,27 +6,37 @@ class UrlState {
   UrlState(this.url, this.completed);
 }
 
+class UrlStates {
+  // List<UrlState> incompList;
+  // List<UrlState> compList;
+  List<UrlState> displayList;
+  bool condition;
+  // UrlStates(this.incompList, this.compList, this.displayList);
+  UrlStates(this.displayList, this.condition);
+}
+
 final downloadListProvider =
-    StateNotifierProvider<DownloadListStateNotifier, List<UrlState>>((_) {
+    StateNotifierProvider<DownloadListStateNotifier, UrlStates>((_) {
   return DownloadListStateNotifier();
 });
 
-List<UrlState> list = [];
+List<UrlState> incompList = [];
+List<UrlState> compList = [];
+bool condition = false;
 
-class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
-  DownloadListStateNotifier() : super(<UrlState>[]);
+class DownloadListStateNotifier extends StateNotifier<UrlStates> {
+  DownloadListStateNotifier() : super(UrlStates(incompList, condition));
   void setUrl(String url) {
-    list.add(UrlState(url, false));
-    getConditionList(false);
+    incompList.add(UrlState(url, false));
+    state = UrlStates(incompList, condition);
   }
 
-  void getConditionList(bool completed) {
-    List<UrlState> conditionList = [];
-    list.forEach((state) {
-      if (state.completed == completed) {
-        conditionList.add(state);
-      }
-    });
-    state = conditionList.toList();
+  void setDisplayList(bool nextCondition) {
+    condition = nextCondition;
+    if (condition) {
+      state = UrlStates(compList, condition);
+    } else {
+      state = UrlStates(incompList, condition);
+    }
   }
 }

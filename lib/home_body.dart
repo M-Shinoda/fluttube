@@ -17,13 +17,17 @@ class HomeBodyView extends HookConsumerWidget {
     final dListNotifier = ref.read(downloadListProvider.notifier);
     final dList = ref.watch(downloadListProvider);
 
+    bool condition = false;
+
     return Container(
       child: Column(
         children: <Widget>[
           // Text('$count'),
           // Text('$url'),
           // Text('$dList'),
-          Text(dList.isNotEmpty ? dList.last.url : 'No data'),
+          Text(dList.displayList.isNotEmpty
+              ? dList.displayList.last.url
+              : 'No data'),
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 30),
             child: TextField(
@@ -35,10 +39,7 @@ class HomeBodyView extends HookConsumerWidget {
           ElevatedButton(
             onPressed: () {
               dListNotifier.setUrl(url);
-              dList.forEach((e) {
-                // print(e.url);
-              });
-              print(dList.length);
+              print(dList.displayList.length);
             },
             child: const Text('Download'),
           ),
@@ -50,26 +51,33 @@ class HomeBodyView extends HookConsumerWidget {
                 child: TextButton(
                   onPressed: () {
                     // conditionList =
-                    //     dListNotifier.getConditionList(true).toList();
-                    dListNotifier.getConditionList(true);
+                    //     dListNotifier.getConditionList(true).toList();]
+                    condition = true;
+                    dListNotifier.setDisplayList(true);
                   },
                   child: Text("ダウンロード済"),
+                  style: TextButton.styleFrom(
+                      backgroundColor:
+                          dList.condition ? Colors.orange[100] : null),
                 ),
               ),
               Expanded(
                 child: TextButton(
-                  onPressed: () {
-                    // conditionList =
-                    //     dListNotifier.getConditionList(false).toList();
-                    dListNotifier.getConditionList(false);
-                  },
-                  child: Text("ダウンロード中"),
-                ),
+                    onPressed: () {
+                      // conditionList =
+                      //     dListNotifier.getConditionList(false).toList();
+                      condition = false;
+                      dListNotifier.setDisplayList(false);
+                    },
+                    child: Text("ダウンロード中"),
+                    style: TextButton.styleFrom(
+                        backgroundColor:
+                            dList.condition ? null : Colors.orange[100])),
               ),
             ],
           ),
           Expanded(
-            child: ListCard(items: dList),
+            child: ListCard(items: dList.displayList),
           ),
           FloatingActionButton(
             onPressed: () {
