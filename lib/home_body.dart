@@ -42,6 +42,32 @@ class HomeBodyView extends HookConsumerWidget {
             },
             child: const Text('Download'),
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            // crossAxisAlignment: CrossAxisAlignment,
+            children: <Widget>[
+              Expanded(
+                child: TextButton(
+                  onPressed: () {
+                    // conditionList =
+                    //     dListNotifier.getConditionList(true).toList();
+                    dListNotifier.getConditionList(true);
+                  },
+                  child: Text("ダウンロード済"),
+                ),
+              ),
+              Expanded(
+                child: TextButton(
+                  onPressed: () {
+                    // conditionList =
+                    //     dListNotifier.getConditionList(false).toList();
+                    dListNotifier.getConditionList(false);
+                  },
+                  child: Text("ダウンロード中"),
+                ),
+              ),
+            ],
+          ),
           Expanded(
             child: ListCard(items: dList),
           ),

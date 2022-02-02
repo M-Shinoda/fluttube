@@ -3,7 +3,7 @@ import 'package:fluttube/download_list.dart';
 
 class ListCard extends StatefulWidget {
   const ListCard({Key? key, required this.items}) : super(key: key);
-  final List<UrlStateList> items;
+  final List<UrlState> items;
 
   @override
   State<ListCard> createState() => _ListCard();
@@ -25,6 +25,7 @@ class _ListCard extends State<ListCard> {
 
   @override
   Widget build(BuildContext context) {
+    print("########" + widget.items.toString());
     return ListView.builder(
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
@@ -36,7 +37,7 @@ class _ListCard extends State<ListCard> {
           child: ListTile(
             leading: const Icon(Icons.people),
             title: Text(
-              item.url.toString() + " : " + item.completed,
+              item.url.toString() + " : " + item.completed.toString(),
               style: const TextStyle(
                 overflow: TextOverflow.ellipsis,
               ),
