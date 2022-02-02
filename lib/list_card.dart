@@ -1,37 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:fluttube/download_list.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class ListCard extends StatefulWidget {
-  const ListCard({Key? key, required this.items}) : super(key: key);
+class ListCard extends HookConsumerWidget {
   final List<UrlState> items;
-
+  ListCard({Key? key, required this.items}) : super(key: key);
   @override
-  State<ListCard> createState() => _ListCard();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dListNotifier = ref.read(downloadListProvider.notifier);
+    var dList = ref.watch(downloadListProvider);
+    double d = 0.0;
 
-class _ListCard extends State<ListCard> {
-  List<Map<String, dynamic>> dones = [];
-  @override
-  void initState() {
-    super.initState();
-    print('initState ########');
-  }
-
-  @override
-  void didUpdateWidget(covariant ListCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    print('didUpdateWidget');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    print("########" + widget.items.toString());
     return ListView.builder(
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
-      itemCount: widget.items.length,
+      itemCount: this.items.length,
       itemBuilder: (BuildContext context, int index) {
-        final item = widget.items[index];
+        final item = this.items[index];
 
         return Card(
           child: ListTile(
@@ -42,7 +28,9 @@ class _ListCard extends State<ListCard> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            trailing: const CircularProgressIndicator(),
+            trailing: CircularProgressIndicator(
+              value: dList.displayList[0].progress,
+            ),
           ),
         );
       },
