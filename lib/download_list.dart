@@ -9,10 +9,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class UrlState {
+  int id;
   String url;
   bool completed;
   double progress;
-  UrlState(this.url, this.completed, this.progress);
+  UrlState(this.id, this.url, this.completed, this.progress);
 }
 
 class UrlStates {
@@ -32,13 +33,15 @@ final downloadListProvider =
 List<UrlState> incompList = [];
 List<UrlState> compList = [];
 bool condition = false;
+int id = 0;
 
 class DownloadListStateNotifier extends StateNotifier<UrlStates> {
   DownloadListStateNotifier() : super(UrlStates(incompList, condition));
   void setUrl(String url) {
-    incompList.add(UrlState(url, false, 0.0));
+    incompList.add(UrlState(id, url, false, 0.0));
     state = UrlStates(incompList, false);
-    downloadProc(url, incompList);
+    downloadProc(id, incompList);
+    id++;
   }
 
   void setDisplayList(bool nextCondition) {
@@ -50,9 +53,9 @@ class DownloadListStateNotifier extends StateNotifier<UrlStates> {
     }
   }
 
-  void downloadProc(String url, List<UrlState> status) async {
+  void downloadProc(int index, List<UrlState> status) async {
     var yt = YoutubeExplode();
-    var id = VideoId(url);
+    var id = VideoId(status[index].url);
     var video = await yt.videos.get(id);
     print("Title: ${video.title}");
     print("Title: ${video.duration}");
@@ -94,16 +97,17 @@ class DownloadListStateNotifier extends StateNotifier<UrlStates> {
 
     var audioStream = yt.videos.streamsClient.get(audio);
     var count = 0;
+    double progress = 0.0;
     await for (final data in audioStream) {
       // Keep track of the current downloaded data.
       count += data.length;
 
       // Calculate the current progress.
-      double progress = count / bytes;
+      progress = count / bytes;
       print(progress);
 
       // Update the progressbar.
-      status[0].progress = progress;
+      status[index].progress = progress;
       state = UrlStates(status, false);
       // Write to file.
       fileStream.add(data);
