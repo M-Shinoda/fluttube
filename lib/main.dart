@@ -24,6 +24,7 @@ class MyApp extends HookConsumerWidget {
     useEffect(() {
       sharingUrlProc(dListNotifier);
     }, []);
+
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: BottomView(),
