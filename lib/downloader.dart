@@ -1,3 +1,5 @@
+// ignore_for_file: dead_code
+
 import 'dart:async';
 import 'dart:io';
 
@@ -23,13 +25,16 @@ Future<String> download(BuildContext context, [String? url]) async {
   //     );
   //   },
   // );
+  // ignore: avoid_print
   print('###');
   await Permission.storage.request();
+  // ignore: avoid_print
   print('#####');
 
   // Get the streams manifest and the audio track.
   var manifest = await yt.videos.streamsClient.getManifest(id);
   var audio = manifest.audioOnly.firstWhere((item) => item.tag == 140);
+  // ignore: avoid_print
   print('#######');
   // Build the directory.
   var dir = await DownloadsPathProvider.downloadsDirectory;

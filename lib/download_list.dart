@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // ignore: import_of_legacy_library_into_null_safe
@@ -57,7 +56,9 @@ class DownloadListStateNotifier extends StateNotifier<UrlStates> {
     var yt = YoutubeExplode();
     var id = VideoId(status[index].url);
     var video = await yt.videos.get(id);
+    // ignore: avoid_print
     print("Title: ${video.title}");
+    // ignore: avoid_print
     print("Title: ${video.duration}");
     await Permission.storage.request();
     var manifest = await yt.videos.streamsClient.getManifest(id);
@@ -76,11 +77,13 @@ class DownloadListStateNotifier extends StateNotifier<UrlStates> {
         .replaceAll('<', '')
         .replaceAll('>', '')
         .replaceAll('|', '');
+    // ignore: avoid_print
     print(fileName);
     var filePath =
         // path.join(dirM.path, '${video.id}.${audio.container.name}');
         path.join(dirM.path, fileName);
     var file = File(filePath);
+    // ignore: avoid_print
     print(file);
     var fileStream = file.openWrite();
 
@@ -104,6 +107,7 @@ class DownloadListStateNotifier extends StateNotifier<UrlStates> {
 
       // Calculate the current progress.
       progress = count / bytes;
+      // ignore: avoid_print
       print(progress);
 
       // Update the progressbar.
@@ -116,6 +120,7 @@ class DownloadListStateNotifier extends StateNotifier<UrlStates> {
 
     await fileStream.flush();
     await fileStream.close();
+    // ignore: avoid_print
     print("finish");
   }
 }

@@ -5,9 +5,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class BottomView extends HookConsumerWidget {
+  const BottomView({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final _pageWidget = [Container(), HomeView()];
+    final _pageWidget = [Container(), const HomeView()];
     final _currentIndex = useState(0);
 
     void _onItemTapped(int index) {
