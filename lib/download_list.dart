@@ -52,6 +52,26 @@ class DownloadListStateNotifier extends StateNotifier<UrlStates> {
     }
   }
 
+  List<UrlState> getList({required bool isComlete}) {
+    List<UrlState> list = [];
+    if (isComlete) {
+      // ignore: avoid_function_literals_in_foreach_calls
+      incompList.forEach((e) {
+        if (e.progress == 1.0) {
+          list.add(e);
+        }
+      });
+    } else {
+      // ignore: avoid_function_literals_in_foreach_calls
+      incompList.forEach((e) {
+        if (e.progress != 1.0) {
+          list.add(e);
+        }
+      });
+    }
+    return list;
+  }
+
   void downloadProc(int index, List<UrlState> status) async {
     var yt = YoutubeExplode();
     var id = VideoId(status[index].url);
