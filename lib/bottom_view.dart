@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttube/home.dart';
+import 'package:fluttube/download_view.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:fluttube/home.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class BottomView extends HookConsumerWidget {
@@ -9,7 +10,7 @@ class BottomView extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final _pageWidget = [Container(), const HomeView()];
+    final _pageWidget = [const HomeView(), const DownloadView()];
     final _currentIndex = useState(0);
 
     void _onItemTapped(int index) {
