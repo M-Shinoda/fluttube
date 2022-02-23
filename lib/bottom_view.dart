@@ -15,6 +15,7 @@ class BottomView extends HookConsumerWidget {
         padding: const EdgeInsets.only(top: 100),
         child: const InputUrlContent(),
       ),
+      Container(),
       const DownloadView()
     ];
     final _currentIndex = useState(0);
@@ -36,6 +37,8 @@ class BottomView extends HookConsumerWidget {
         onTap: _onItemTapped,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.assignment_rounded), label: "undefined"),
           BottomNavigationBarItem(
               icon: Icon(Icons.account_balance_wallet_rounded),
               label: "Download"),
