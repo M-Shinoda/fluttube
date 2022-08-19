@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttube/bottom_view.dart';
 import 'package:fluttube/download_list.dart';
@@ -23,6 +22,7 @@ class MyApp extends HookConsumerWidget {
 
     useEffect(() {
       sharingUrlProc(dListNotifier);
+      return;
     }, []);
 
     return const MaterialApp(
