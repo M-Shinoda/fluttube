@@ -27,7 +27,7 @@ class InputUrlContent extends HookConsumerWidget {
           onPressed: () {
             dListNotifier.setUrl(url);
             // ignore: avoid_print
-            print(dList.displayList.length);
+            print(dList.length);
           },
           child: const Text('Download'),
         ),

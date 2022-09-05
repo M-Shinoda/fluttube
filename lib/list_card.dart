@@ -26,9 +26,8 @@ class ListCard extends HookConsumerWidget {
               ),
             ),
             trailing: CircularProgressIndicator(
-              value: dList.displayList[index].progress == 0.0
-                  ? null
-                  : dList.displayList[index].progress,
+              value:
+                  dList[index].progress == 0.0 ? null : dList[index].progress,
             ),
           ),
         );

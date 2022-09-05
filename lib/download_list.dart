@@ -15,61 +15,21 @@ class UrlState {
   UrlState(this.id, this.url, this.completed, this.progress);
 }
 
-class UrlStates {
-  // List<UrlState> incompList;
-  // List<UrlState> compList;
-  List<UrlState> displayList;
-  bool condition;
-  // UrlStates(this.incompList, this.compList, this.displayList);
-  UrlStates(this.displayList, this.condition);
-}
-
 final downloadListProvider =
-    StateNotifierProvider<DownloadListStateNotifier, UrlStates>((_) {
+    StateNotifierProvider<DownloadListStateNotifier, List<UrlState>>((_) {
   return DownloadListStateNotifier();
 });
 
-List<UrlState> incompList = [];
-List<UrlState> compList = [];
-bool condition = false;
+List<UrlState> list = [];
 int id = 0;
 
-class DownloadListStateNotifier extends StateNotifier<UrlStates> {
-  DownloadListStateNotifier() : super(UrlStates(incompList, condition));
+class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
+  DownloadListStateNotifier() : super(list);
   void setUrl(String url) {
-    incompList.add(UrlState(id, url, false, 0.0));
-    state = UrlStates(incompList, false);
-    downloadProc(id, incompList);
+    list.add(UrlState(id, url, false, 0.0));
+    state = [...list];
+    downloadProc(id, list);
     id++;
-  }
-
-  void setDisplayList(bool nextCondition) {
-    condition = nextCondition;
-    if (condition) {
-      state = UrlStates(compList, condition);
-    } else {
-      state = UrlStates(incompList, condition);
-    }
-  }
-
-  List<UrlState> getList({required bool isComlete}) {
-    List<UrlState> list = [];
-    if (isComlete) {
-      // ignore: avoid_function_literals_in_foreach_calls
-      incompList.forEach((e) {
-        if (e.progress == 1.0) {
-          list.add(e);
-        }
-      });
-    } else {
-      // ignore: avoid_function_literals_in_foreach_calls
-      incompList.forEach((e) {
-        if (e.progress != 1.0) {
-          list.add(e);
-        }
-      });
-    }
-    return list;
   }
 
   void downloadProc(int index, List<UrlState> status) async {
@@ -132,10 +92,12 @@ class DownloadListStateNotifier extends StateNotifier<UrlStates> {
 
       // Update the progressbar.
       status[index].progress = progress;
-      state = UrlStates(status, false);
+      state = [...list];
       // Write to file.
       fileStream.add(data);
     }
+    status[index].completed = true;
+    state = [...list];
     await fileStream.close();
 
     await fileStream.flush();

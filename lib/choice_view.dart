@@ -13,12 +13,15 @@ class ChoiceView extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dListNotifier = ref.read(downloadListProvider.notifier);
+    final dList = ref.watch(downloadListProvider);
+
     return Column(
       children: <Widget>[
         Expanded(
-          child: ListCard(
-              items: dListNotifier.getList(isComlete: choice.complete)),
+          child: ListCard(items: [
+            ...dList
+                .takeWhile((urlState) => urlState.completed == choice.complete)
+          ]),
         ),
       ],
     );
