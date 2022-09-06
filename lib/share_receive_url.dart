@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -13,29 +11,16 @@ class ShareReceiveUrl extends StatefulWidget {
 }
 
 class _ShareReceiveUrl extends State<ShareReceiveUrl> {
-  late StreamSubscription _intentDataStreamSubscription;
   String? _sharedText;
   @override
   Widget build(BuildContext context) {
-    return Container(width: 0, height: 0);
+    return const SizedBox(width: 0, height: 0);
   }
 
   @override
   void initState() {
     super.initState();
     // For sharing or opening urls/text coming from outside the app while the app is in the memory
-    _intentDataStreamSubscription =
-        ReceiveSharingIntent.getTextStream().listen((String value) async {
-      setState(() {
-        _sharedText = value;
-        // ignore: avoid_print
-        print("Shared: $_sharedText");
-      });
-      await download(context, _sharedText);
-    }, onError: (err) {
-      // ignore: avoid_print
-      print("getLinkStream error: $err");
-    });
 
     // For sharing or opening urls/text coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialText().then((String? value) async {
@@ -45,6 +30,7 @@ class _ShareReceiveUrl extends State<ShareReceiveUrl> {
         // ignore: avoid_print
         print("Shared: $_sharedText");
       });
+      // ignore: avoid_print
       print('########');
 
       await download(context, _sharedText);

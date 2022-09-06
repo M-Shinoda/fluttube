@@ -1,33 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:fluttube/download_list.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class ListCard extends StatefulWidget {
+class ListCard extends HookConsumerWidget {
+  final List<UrlState> items;
   const ListCard({Key? key, required this.items}) : super(key: key);
-  final List<Map<String, dynamic>> items;
-
   @override
-  State<ListCard> createState() => _ListCard();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    var dList = ref.watch(downloadListProvider);
 
-class _ListCard extends State<ListCard> {
-  @override
-  Widget build(BuildContext context) {
     return ListView.builder(
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
-      itemCount: widget.items.length,
+      itemCount: items.length,
       itemBuilder: (BuildContext context, int index) {
-        final item = widget.items[index];
+        final item = items[index];
 
         return Card(
           child: ListTile(
             leading: const Icon(Icons.people),
             title: Text(
-              item["id"].toString() + " : " + item["title"],
+              item.url.toString() + " : " + item.completed.toString(),
               style: const TextStyle(
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            trailing: const CircularProgressIndicator(),
+            trailing: CircularProgressIndicator(
+              value:
+                  dList[index].progress == 0.0 ? null : dList[index].progress,
+            ),
           ),
         );
       },
