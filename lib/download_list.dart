@@ -69,18 +69,12 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     var count = 0;
     double progress = 0.0;
     await for (final data in audioStream) {
-      // Keep track of the current downloaded data.
       count += data.length;
 
-      // Calculate the current progress.
       progress = count / bytes;
-      // ignore: avoid_print
       print(progress);
-
-      // Update the progressbar.
       status[index].progress = progress;
       state = [..._list];
-      // Write to file.
       fileStream.add(data);
     }
     status[index].completed = true;
