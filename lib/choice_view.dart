@@ -19,8 +19,7 @@ class ChoiceView extends HookConsumerWidget {
       children: <Widget>[
         Expanded(
           child: ListCard(items: [
-            ...dList
-                .takeWhile((urlState) => urlState.completed == choice.complete)
+            ...dList.where((urlState) => urlState.completed == choice.complete)
           ]),
         ),
       ],
