@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:downloads_path_provider/downloads_path_provider.dart';
 import 'package:path/path.dart' as path;
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:permission_handler/permission_handler.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+
+import 'main.dart';
 
 class UrlState {
   int id;
@@ -44,9 +44,6 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     var manifest = await yt.videos.streamsClient.getManifest(id);
     var audio = manifest.audioOnly.firstWhere((item) => item.tag == 140);
     var bytes = audio.size.totalBytes;
-    var dir = await DownloadsPathProvider.downloadsDirectory;
-    var dirM = await Directory(dir.uri.toFilePath() + 'Music/')
-        .create(recursive: true);
     // Compose the file name removing the unallowed characters in windows.
     var fileName = '${video.title}.mp3'
         .replaceAll(r'\', '')

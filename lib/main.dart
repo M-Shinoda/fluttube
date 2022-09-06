@@ -1,3 +1,7 @@
+import 'dart:io';
+
+// ignore: import_of_legacy_library_into_null_safe
+import 'package:downloads_path_provider/downloads_path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttube/bottom_view.dart';
 import 'package:fluttube/download_list.dart';
@@ -13,6 +17,10 @@ void main() {
   );
 }
 
+late Directory dir;
+late Directory dirM;
+late Directory dirC;
+
 class MyApp extends HookConsumerWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -21,6 +29,11 @@ class MyApp extends HookConsumerWidget {
     final dListNotifier = ref.read(downloadListProvider.notifier);
 
     useEffect(() {
+      Future.delayed(Duration.zero, () async {
+        dir = await DownloadsPathProvider.downloadsDirectory;
+        dirM = Directory(dir.uri.toFilePath() + 'Music');
+        dirC = Directory(dir.uri.toFilePath() + 'Cache');
+      });
       sharingUrlProc(dListNotifier);
       return;
     }, []);
