@@ -44,17 +44,7 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     var manifest = await yt.videos.streamsClient.getManifest(id);
     var audio = manifest.audioOnly.firstWhere((item) => item.tag == 140);
     var bytes = audio.size.totalBytes;
-    // Compose the file name removing the unallowed characters in windows.
-    var fileName = '${video.title}.mp3'
-        .replaceAll(r'\', '')
-        .replaceAll('/', '')
-        .replaceAll('*', '')
-        .replaceAll('?', '')
-        .replaceAll('"', '')
-        .replaceAll('<', '')
-        .replaceAll('>', '')
-        .replaceAll('|', '');
-    // ignore: avoid_print
+    var fileName = _composeFileName(video.title);
     print(fileName);
     var filePath =
         // path.join(dirM.path, '${video.id}.${audio.container.name}');
@@ -99,7 +89,18 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
 
     await fileStream.flush();
     await fileStream.close();
-    // ignore: avoid_print
-    print("finish");
+  }
+
+  // Compose the file name removing the unallowed characters in windows.
+  String _composeFileName(String title) {
+    return '$title.mp3'
+        .replaceAll(r'\', '')
+        .replaceAll('/', '')
+        .replaceAll('*', '')
+        .replaceAll('?', '')
+        .replaceAll('"', '')
+        .replaceAll('<', '')
+        .replaceAll('>', '')
+        .replaceAll('|', '');
   }
 }
