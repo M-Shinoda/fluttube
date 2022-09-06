@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttube/download_list.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class ListCard extends HookConsumerWidget {
+class ListCard extends HookWidget {
   final List<UrlState> items;
   const ListCard({Key? key, required this.items}) : super(key: key);
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    var dList = ref.watch(downloadListProvider);
-
+  Widget build(BuildContext context) {
     return ListView.builder(
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
@@ -27,7 +25,7 @@ class ListCard extends HookConsumerWidget {
             ),
             trailing: CircularProgressIndicator(
               value:
-                  dList[index].progress == 0.0 ? null : dList[index].progress,
+                  items[index].progress == 0.0 ? null : items[index].progress,
             ),
           ),
         );
