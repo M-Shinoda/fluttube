@@ -20,16 +20,16 @@ final downloadListProvider =
   return DownloadListStateNotifier();
 });
 
-List<UrlState> list = [];
-int id = 0;
+List<UrlState> _list = [];
+int _id = 0;
 
 class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
-  DownloadListStateNotifier() : super(list);
+  DownloadListStateNotifier() : super(_list);
   void setUrl(String url) {
-    list.add(UrlState(id, url, false, 0.0));
-    state = [...list];
-    downloadProc(id, list);
-    id++;
+    _list.add(UrlState(_id, url, false, 0.0));
+    state = [..._list];
+    downloadProc(_id, _list);
+    _id++;
   }
 
   void downloadProc(int index, List<UrlState> status) async {
@@ -89,12 +89,12 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
 
       // Update the progressbar.
       status[index].progress = progress;
-      state = [...list];
+      state = [..._list];
       // Write to file.
       fileStream.add(data);
     }
     status[index].completed = true;
-    state = [...list];
+    state = [..._list];
     await fileStream.close();
 
     await fileStream.flush();
