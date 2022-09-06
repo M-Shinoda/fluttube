@@ -12,7 +12,6 @@ class InputUrlContent extends HookConsumerWidget {
     final urlNotifier = ref.read(textFieldUrlProvider.notifier);
     final url = ref.watch(textFieldUrlProvider);
     final dListNotifier = ref.read(downloadListProvider.notifier);
-    final dList = ref.watch(downloadListProvider);
     return Column(
       children: <Widget>[
         Container(
@@ -26,8 +25,6 @@ class InputUrlContent extends HookConsumerWidget {
         ElevatedButton(
           onPressed: () {
             dListNotifier.setUrl(url);
-            // ignore: avoid_print
-            print(dList.length);
           },
           child: const Text('Download'),
         ),
