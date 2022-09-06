@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:permission_handler/permission_handler.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import 'main.dart';
@@ -36,7 +34,6 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     var yt = YoutubeExplode();
     var id = VideoId(status[index].url);
     var video = await yt.videos.get(id);
-    await Permission.storage.request();
     var manifest = await yt.videos.streamsClient.getManifest(id);
     var audio = manifest.audioOnly.firstWhere((item) => item.tag == 140);
     var bytes = audio.size.totalBytes;
