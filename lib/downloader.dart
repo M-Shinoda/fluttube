@@ -4,8 +4,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:downloads_path_provider/downloads_path_provider.dart';
+import 'package:fluttube/main.dart';
 import 'package:path/path.dart' as path;
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:permission_handler/permission_handler.dart';
@@ -36,10 +35,6 @@ Future<String> download(BuildContext context, [String? url]) async {
   var audio = manifest.audioOnly.firstWhere((item) => item.tag == 140);
   // ignore: avoid_print
   print('#######');
-  // Build the directory.
-  var dir = await DownloadsPathProvider.downloadsDirectory;
-  var dirM =
-      await Directory(dir.uri.toFilePath() + 'Music/').create(recursive: true);
   // Compose the file name removing the unallowed characters in windows.
   var fileName = '${video.title}.mp3'
       .replaceAll(r'\', '')

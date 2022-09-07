@@ -33,3 +33,25 @@ class ListCard extends HookWidget {
     );
   }
 }
+
+class ListCacheCard extends HookWidget {
+  final List<DownloadCache> caches;
+  const ListCacheCard({Key? key, required this.caches}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        itemCount: caches.length,
+        itemBuilder: (BuildContext context, int index) {
+          final item = caches[index];
+
+          return Card(
+              child: ListTile(
+                  leading: const Icon(Icons.people),
+                  title: Text(item.name.toString(),
+                      style:
+                          const TextStyle(overflow: TextOverflow.ellipsis))));
+        });
+  }
+}

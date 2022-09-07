@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
@@ -11,6 +12,23 @@ class UrlState {
   bool completed;
   double progress;
   UrlState(this.id, this.url, this.completed, this.progress);
+}
+
+class DownloadCache {
+  int id;
+  String url;
+  String name;
+  DateTime date;
+  DownloadCache(this.id, this.url, this.name, this.date);
+
+  DownloadCache.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
+        url = json['url'],
+        name = json['name'] as String,
+        date = DateTime.parse(json['date']);
+
+  Map<String, dynamic> toJson() =>
+      {'id': id, 'url': url, 'name': name, 'date': date.toIso8601String()};
 }
 
 final downloadListProvider =
@@ -57,8 +75,7 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     }
     status[index].completed = true;
     state = [..._list];
-    await fileStream.close();
-
+    await _writeCache(index, status[index].url, fileName, DateTime.now());
     await fileStream.flush();
     await fileStream.close();
   }
@@ -75,4 +92,20 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
         .replaceAll('>', '')
         .replaceAll('|', '');
   }
+
+  Future<void> _writeCache(
+      int id, String url, String name, DateTime date) async {
+    final cacheList = await readCache();
+    cacheList.add(DownloadCache(id, url, name, date));
+    cacheFile.writeAsString(json.encode(cacheList));
+  }
+}
+
+Future<List<DownloadCache>> readCache() async {
+  var cacheString = await cacheFile.readAsString();
+  if (cacheString == '') cacheString = '[]';
+  final cacheJson = json.decode(cacheString);
+  return [
+    ...(cacheJson as List<dynamic>).map((data) => DownloadCache.fromJson(data))
+  ];
 }

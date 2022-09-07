@@ -21,7 +21,7 @@ void main() {
 
 late Directory dir;
 late Directory dirM;
-late Directory dirC;
+late File cacheFile;
 
 class MyApp extends HookConsumerWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -35,7 +35,9 @@ class MyApp extends HookConsumerWidget {
         await Permission.storage.request();
         dir = await DownloadsPathProvider.downloadsDirectory;
         dirM = Directory(dir.uri.toFilePath() + 'Music');
-        dirC = Directory(dir.uri.toFilePath() + 'Cache');
+        cacheFile = await File(
+                Directory(dir.uri.toFilePath() + 'Cache').path + '/cache3.txt')
+            .create(recursive: true);
         sharingUrlProc(dListNotifier);
       });
       return;
