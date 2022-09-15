@@ -4,6 +4,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttube/input_url_content.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import 'audio.dart';
+
 class BottomView extends HookConsumerWidget {
   const BottomView({Key? key}) : super(key: key);
 
@@ -14,7 +16,7 @@ class BottomView extends HookConsumerWidget {
         padding: const EdgeInsets.only(top: 100),
         child: const InputUrlContent(),
       ),
-      Container(),
+      AudioView(),
       const DownloadView()
     ];
     final _currentIndex = useState(0);
@@ -27,6 +29,7 @@ class BottomView extends HookConsumerWidget {
 
     return Scaffold(
       body: PageView(
+        // physics: NeverScrollableScrollPhysics(),
         controller: _pageViewController,
         children: _pageWidget,
         onPageChanged: (index) => _currentIndex.value = index,
@@ -37,7 +40,7 @@ class BottomView extends HookConsumerWidget {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(
-              icon: Icon(Icons.assignment_rounded), label: "undefined"),
+              icon: Icon(Icons.assignment_rounded), label: "Audio"),
           BottomNavigationBarItem(
               icon: Icon(Icons.account_balance_wallet_rounded),
               label: "Download"),

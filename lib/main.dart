@@ -9,9 +9,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:permission_handler/permission_handler.dart';
+import 'page_manager.dart';
+import 'services/service_locator.dart';
 import 'utils.dart';
 
-void main() {
+void main() async {
+  await setupServiceLocator();
   runApp(
     const ProviderScope(
       child: MyApp(),
@@ -31,16 +34,19 @@ class MyApp extends HookConsumerWidget {
     final dListNotifier = ref.read(downloadListProvider.notifier);
 
     useEffect(() {
+      getIt<PageManager>().init();
       Future.delayed(Duration.zero, () async {
         await Permission.storage.request();
         dir = await DownloadsPathProvider.downloadsDirectory;
         dirM = Directory(dir.uri.toFilePath() + 'Music');
         cacheFile = await File(
-                Directory(dir.uri.toFilePath() + 'Cache').path + '/cache3.txt')
+                Directory(dir.uri.toFilePath() + 'Cache').path + '/cache.txt')
             .create(recursive: true);
         sharingUrlProc(dListNotifier);
       });
-      return;
+      return () {
+        getIt<PageManager>().dispose();
+      };
     }, []);
 
     return const MaterialApp(
