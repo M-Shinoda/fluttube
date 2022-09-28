@@ -6,7 +6,7 @@ import 'package:fluttube/download_list.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:youtube_api/youtube_api.dart';
 
-import 'input_url_content.dart';
+import 'suggest_text_view.dart';
 
 String key = 'AIzaSyAM2qP2XwtD5-9C0q7F5mtCnTuk2VCn1xA';
 YoutubeAPI ytApi = YoutubeAPI(key, maxResults: 30);
