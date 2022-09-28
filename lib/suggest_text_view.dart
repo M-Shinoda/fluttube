@@ -22,12 +22,14 @@ class SuggestSearchContent extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final url = useState('');
+    final inputText = useState('');
 
     final fetchSuggest = useMemoized(() async {
-      if (url.value == '') return SuggestSearch(query: '', suggestQueries: []);
+      if (inputText.value == '') {
+        return SuggestSearch(query: '', suggestQueries: []);
+      }
       final res = await http.get(Uri.parse(
-          'https://www.google.com/complete/search?client=youtube&hl=us&ds=yt&q=${url.value}&json=true'));
+          'https://www.google.com/complete/search?client=youtube&hl=us&ds=yt&q=${inputText.value}&json=true'));
       if (res.statusCode == 200) {
         try {
           return SuggestSearch.fromJson(jsonDecode(utf8.decode(res.bodyBytes)));
@@ -38,7 +40,7 @@ class SuggestSearchContent extends HookConsumerWidget {
         throw Exception('Failed to Load');
       }
       return null;
-    }, [url.value]);
+    }, [inputText.value]);
 
     final suggestSnapshot = useFuture(fetchSuggest);
 
@@ -53,6 +55,6 @@ class SuggestSearchContent extends HookConsumerWidget {
 
     return Container(
         margin: const EdgeInsets.symmetric(horizontal: 30),
-        child: TextField(onChanged: (value) => url.value = value));
+        child: TextField(onChanged: (value) => inputText.value = value));
   }
 }
