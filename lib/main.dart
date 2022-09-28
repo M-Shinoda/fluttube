@@ -13,7 +13,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'utils.dart';
 
 void main() {
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Color(0x00000000), // status bar color
     statusBarIconBrightness: Brightness.dark,
   ));
