@@ -54,7 +54,7 @@ class YoutubeView extends HookConsumerWidget {
 Widget searchTextField(ValueNotifier<SuggestSearch?> suggestSearch) {
   return Container(
     padding: const EdgeInsets.only(top: 30),
-    child: InputUrlContent(
+    child: SuggestSearchContent(
       suggestSearch: suggestSearch,
     ),
   );

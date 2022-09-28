@@ -15,9 +15,9 @@ class SuggestSearch {
         suggestQueries = json[1].cast<String>() as List<String>;
 }
 
-class InputUrlContent extends HookConsumerWidget {
+class SuggestSearchContent extends HookConsumerWidget {
   final ValueNotifier<SuggestSearch?> suggestSearch;
-  const InputUrlContent({required this.suggestSearch, Key? key})
+  const SuggestSearchContent({required this.suggestSearch, Key? key})
       : super(key: key);
 
   @override
