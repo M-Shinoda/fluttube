@@ -39,9 +39,10 @@ class MyApp extends HookConsumerWidget {
       Future.delayed(Duration.zero, () async {
         await Permission.storage.request();
         dir = await DownloadsPathProvider.downloadsDirectory;
-        dirM = Directory(dir.uri.toFilePath() + 'Music');
+        dirM = await Directory(dir.uri.toFilePath() + 'Music')
+            .create(recursive: true);
         cacheFile = await File(
-                Directory(dir.uri.toFilePath() + 'Cache').path + '/cache3.txt')
+                Directory(dir.uri.toFilePath() + 'Cache').path + '/cache.txt')
             .create(recursive: true);
         sharingUrlProc(dListNotifier);
       });
