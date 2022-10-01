@@ -17,7 +17,13 @@ class SuggestSearch {
 
 class SuggestSearchContent extends HookConsumerWidget {
   final ValueNotifier<SuggestSearch?> suggestSearch;
-  const SuggestSearchContent({required this.suggestSearch, Key? key})
+  final ValueNotifier<String> searchText;
+  final ValueNotifier<bool> isVisibleSuggestText;
+  const SuggestSearchContent(
+      {required this.suggestSearch,
+      required this.searchText,
+      required this.isVisibleSuggestText,
+      Key? key})
       : super(key: key);
 
   @override
@@ -55,6 +61,12 @@ class SuggestSearchContent extends HookConsumerWidget {
 
     return Container(
         margin: const EdgeInsets.symmetric(horizontal: 30),
-        child: TextField(onChanged: (value) => inputText.value = value));
+        child: TextField(onChanged: (value) {
+          inputText.value = value;
+          isVisibleSuggestText.value = true;
+        }, onSubmitted: (value) {
+          searchText.value = value;
+          isVisibleSuggestText.value = false;
+        }));
   }
 }

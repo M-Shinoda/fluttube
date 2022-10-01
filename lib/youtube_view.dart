@@ -19,9 +19,34 @@ class YoutubeView extends HookConsumerWidget {
   build(BuildContext context, WidgetRef ref) {
     final dListNotifier = ref.read(downloadListProvider.notifier);
 
-    final searchSnapshot = useMemoized(() async => await ytApi.search('初音ミク'));
-    final searchResult = useFuture(searchSnapshot);
+    final searchText = useState('');
     final suggestSearch = useState<SuggestSearch?>(null);
+    final isVisibleSuggestText = useState(false);
+
+    final searchSnapshot = useMemoized(
+        () async => searchText.value != ''
+            ? await ytApi.search(searchText.value)
+            : null,
+        [searchText.value]);
+    final searchResult = useFuture(searchSnapshot);
+
+    final _suggestList = useCallback(() {
+      if (suggestSearch.value != null &&
+          suggestSearch.value!.query != '' &&
+          isVisibleSuggestText.value) {
+        return Container(
+            width: double.maxFinite,
+            color: Colors.white,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...suggestSearch.value!.suggestQueries
+                      .map((query) => suggestTextContent(query))
+                ]));
+      } else {
+        return Container();
+      }
+    }, [suggestSearch.value, isVisibleSuggestText.value]);
 
     // useEffect(() {
     //   Future.delayed(Duration.zero, () async {
@@ -30,34 +55,28 @@ class YoutubeView extends HookConsumerWidget {
     //   });
     // }, [searchResult.data]);
 
-    return Column(
-      children: [
-        searchTextField(suggestSearch),
-        Expanded(
-          // height: 200,
-          // width: double.infinity,
-          child: SingleChildScrollView(
-              child: Column(children: [
-            if (suggestSearch.value != null)
-              ...suggestSearch.value!.suggestQueries
-                  .map((query) => Text(query)),
-            if (searchResult.hasData)
-              ...searchResult.data!
-                  .map((item) => videoCard(item, dListNotifier))
-          ])),
-        )
-      ],
-    );
-  }
-}
+    Widget _searchTextField() {
+      return Container(
+          padding: const EdgeInsets.only(top: 30),
+          child: SuggestSearchContent(
+              suggestSearch: suggestSearch,
+              searchText: searchText,
+              isVisibleSuggestText: isVisibleSuggestText));
+    }
 
-Widget searchTextField(ValueNotifier<SuggestSearch?> suggestSearch) {
-  return Container(
-    padding: const EdgeInsets.only(top: 30),
-    child: SuggestSearchContent(
-      suggestSearch: suggestSearch,
-    ),
-  );
+    return Column(children: [
+      _searchTextField(),
+      Expanded(
+          child: Stack(children: [
+        SingleChildScrollView(
+            child: Column(children: [
+          if (searchResult.hasData)
+            ...searchResult.data!.map((item) => videoCard(item, dListNotifier))
+        ])),
+        _suggestList()
+      ]))
+    ]);
+  }
 }
 
 Widget videoCard(YouTubeVideo item, dListNotifier) {
@@ -72,4 +91,13 @@ Widget videoCard(YouTubeVideo item, dListNotifier) {
             Image.network(item.thumbnail.medium.url!, width: 70),
             Expanded(child: Text(item.title, overflow: TextOverflow.ellipsis))
           ])));
+}
+
+Widget suggestTextContent(String suggest) {
+  return Container(
+      height: 20,
+      decoration: const BoxDecoration(
+          color: Colors.white60,
+          borderRadius: BorderRadius.all(Radius.circular(30))),
+      child: Text(suggest));
 }
