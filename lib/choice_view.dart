@@ -41,7 +41,7 @@ class ChoiceView extends HookConsumerWidget {
               ? ListCard(
                   items: [...dList.where((urlState) => !urlState.completed)])
               : fetchCache.data != null
-                  ? ListCacheCard(caches: [...fetchCache.data!])
+                  ? ListCacheCard(caches: [...fetchCache.data!.reversed])
                   : Container())
     ]);
   }
