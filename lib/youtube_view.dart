@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttube/download_list.dart';
@@ -19,9 +17,50 @@ class YoutubeView extends HookConsumerWidget {
   build(BuildContext context, WidgetRef ref) {
     final dListNotifier = ref.read(downloadListProvider.notifier);
 
-    final searchSnapshot = useMemoized(() async => await ytApi.search('初音ミク'));
-    final searchResult = useFuture(searchSnapshot);
+    final searchText = useState('');
     final suggestSearch = useState<SuggestSearch?>(null);
+    final isVisibleSuggestText = useState(false);
+
+    final searchSnapshot = useMemoized(
+        () async => searchText.value != ''
+            ? await ytApi.search(searchText.value)
+            : null,
+        [searchText.value]);
+    final searchResult = useFuture(searchSnapshot);
+
+    Widget _suggestTextContent(String suggest) {
+      return GestureDetector(
+          onTap: () {
+            searchText.value = suggest;
+            FocusScope.of(context).unfocus();
+            isVisibleSuggestText.value = false;
+          },
+          child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              height: 20,
+              width: double.maxFinite,
+              decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(5))),
+              child: Text(suggest)));
+    }
+
+    final _suggestList = useCallback(() {
+      if (suggestSearch.value != null &&
+          suggestSearch.value!.query != '' &&
+          isVisibleSuggestText.value) {
+        return SizedBox(
+            width: double.maxFinite,
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              ...suggestSearch.value!.suggestQueries
+                  .map((query) => _suggestTextContent(query))
+            ]));
+      } else {
+        return Container();
+      }
+    }, [suggestSearch.value, isVisibleSuggestText.value]);
 
     // useEffect(() {
     //   Future.delayed(Duration.zero, () async {
@@ -30,34 +69,28 @@ class YoutubeView extends HookConsumerWidget {
     //   });
     // }, [searchResult.data]);
 
-    return Column(
-      children: [
-        searchTextField(suggestSearch),
-        Expanded(
-          // height: 200,
-          // width: double.infinity,
-          child: SingleChildScrollView(
-              child: Column(children: [
-            if (suggestSearch.value != null)
-              ...suggestSearch.value!.suggestQueries
-                  .map((query) => Text(query)),
-            if (searchResult.hasData)
-              ...searchResult.data!
-                  .map((item) => videoCard(item, dListNotifier))
-          ])),
-        )
-      ],
-    );
-  }
-}
+    Widget _searchTextField() {
+      return Container(
+          padding: const EdgeInsets.only(top: 30),
+          child: SuggestSearchContent(
+              suggestSearch: suggestSearch,
+              searchText: searchText,
+              isVisibleSuggestText: isVisibleSuggestText));
+    }
 
-Widget searchTextField(ValueNotifier<SuggestSearch?> suggestSearch) {
-  return Container(
-    padding: const EdgeInsets.only(top: 30),
-    child: SuggestSearchContent(
-      suggestSearch: suggestSearch,
-    ),
-  );
+    return Column(children: [
+      _searchTextField(),
+      Expanded(
+          child: Stack(children: [
+        SingleChildScrollView(
+            child: Column(children: [
+          if (searchResult.hasData)
+            ...searchResult.data!.map((item) => videoCard(item, dListNotifier))
+        ])),
+        _suggestList()
+      ]))
+    ]);
+  }
 }
 
 Widget videoCard(YouTubeVideo item, dListNotifier) {

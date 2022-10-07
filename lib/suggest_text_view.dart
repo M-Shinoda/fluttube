@@ -17,12 +17,19 @@ class SuggestSearch {
 
 class SuggestSearchContent extends HookConsumerWidget {
   final ValueNotifier<SuggestSearch?> suggestSearch;
-  const SuggestSearchContent({required this.suggestSearch, Key? key})
+  final ValueNotifier<String> searchText;
+  final ValueNotifier<bool> isVisibleSuggestText;
+  const SuggestSearchContent(
+      {required this.suggestSearch,
+      required this.searchText,
+      required this.isVisibleSuggestText,
+      Key? key})
       : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final inputText = useState('');
+    final textController = useTextEditingController();
 
     final fetchSuggest = useMemoized(() async {
       if (inputText.value == '') {
@@ -45,6 +52,12 @@ class SuggestSearchContent extends HookConsumerWidget {
     final suggestSnapshot = useFuture(fetchSuggest);
 
     useEffect(() {
+      textController.text = searchText.value;
+      print("ff");
+      return null;
+    }, [searchText.value]);
+
+    useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (suggestSnapshot.hasData) {
           suggestSearch.value = suggestSnapshot.data;
@@ -55,6 +68,15 @@ class SuggestSearchContent extends HookConsumerWidget {
 
     return Container(
         margin: const EdgeInsets.symmetric(horizontal: 30),
-        child: TextField(onChanged: (value) => inputText.value = value));
+        child: TextField(
+            controller: textController,
+            onChanged: (value) {
+              inputText.value = value;
+              isVisibleSuggestText.value = true;
+            },
+            onSubmitted: (value) {
+              searchText.value = value;
+              isVisibleSuggestText.value = false;
+            }));
   }
 }
