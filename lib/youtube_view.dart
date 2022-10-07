@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttube/download_list.dart';
@@ -30,19 +28,35 @@ class YoutubeView extends HookConsumerWidget {
         [searchText.value]);
     final searchResult = useFuture(searchSnapshot);
 
+    Widget _suggestTextContent(String suggest) {
+      return GestureDetector(
+          onTap: () {
+            searchText.value = suggest;
+            FocusScope.of(context).unfocus();
+            isVisibleSuggestText.value = false;
+          },
+          child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              height: 20,
+              width: double.maxFinite,
+              decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(5))),
+              child: Text(suggest)));
+    }
+
     final _suggestList = useCallback(() {
       if (suggestSearch.value != null &&
           suggestSearch.value!.query != '' &&
           isVisibleSuggestText.value) {
-        return Container(
+        return SizedBox(
             width: double.maxFinite,
-            color: Colors.white,
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ...suggestSearch.value!.suggestQueries
-                      .map((query) => suggestTextContent(query))
-                ]));
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              ...suggestSearch.value!.suggestQueries
+                  .map((query) => _suggestTextContent(query))
+            ]));
       } else {
         return Container();
       }
