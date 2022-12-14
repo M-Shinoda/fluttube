@@ -39,7 +39,6 @@ class MyApp extends HookConsumerWidget {
     final dListNotifier = ref.read(downloadListProvider.notifier);
 
     useEffect(() {
-      getIt<PageManager>().init();
       Future.delayed(Duration.zero, () async {
         await Permission.storage.request();
         dir = await DownloadsPathProvider.downloadsDirectory;
@@ -49,6 +48,7 @@ class MyApp extends HookConsumerWidget {
                 Directory(dir.uri.toFilePath() + 'Cache').path + '/cache.txt')
             .create(recursive: true);
         sharingUrlProc(dListNotifier);
+        getIt<PageManager>().init();
       });
       return () {
         getIt<PageManager>().dispose();

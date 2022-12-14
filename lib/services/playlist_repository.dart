@@ -1,3 +1,6 @@
+import 'package:fluttube/main.dart';
+import 'package:path/path.dart';
+
 abstract class PlaylistRepository {
   Future<List<Map<String, String>>> fetchInitialPlaylist();
   Future<Map<String, String>> fetchAnotherSong();
@@ -6,7 +9,7 @@ abstract class PlaylistRepository {
 class DemoPlaylist extends PlaylistRepository {
   @override
   Future<List<Map<String, String>>> fetchInitialPlaylist(
-      {int length = 3}) async {
+      {int length = 1}) async {
     return List.generate(length, (index) => _nextSong());
   }
 
@@ -16,16 +19,18 @@ class DemoPlaylist extends PlaylistRepository {
   }
 
   var _songIndex = 0;
-  static const _maxSongNumber = 16;
+  var list = dirM.listSync();
 
   Map<String, String> _nextSong() {
-    _songIndex = (_songIndex % _maxSongNumber) + 1;
+    print(list.toString());
+    final path = list[_songIndex].path;
+    final title = basename(path);
+    _songIndex = (_songIndex % list.length) + 1;
     return {
       'id': _songIndex.toString().padLeft(3, '0'),
-      'title': 'Song $_songIndex',
+      'title': title,
       'album': 'SoundHelix',
-      'url':
-          'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-$_songIndex.mp3',
+      'url': path,
     };
   }
 }

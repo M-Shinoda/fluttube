@@ -33,6 +33,16 @@ class MyAudioHandler extends BaseAudioHandler {
   }
 
   @override
+  Future<void> addQueueItem(MediaItem mediaItem) async {
+    // manage Just Audio
+    final audioSource = _createAudioSource(mediaItem);
+    _playlist.add(audioSource);
+    // notify system
+    final newQueue = queue.value..add(mediaItem);
+    queue.add(newQueue);
+  }
+
+  @override
   Future<void> addQueueItems(List<MediaItem> mediaItems) async {
     // manage Just Audio
     final audioSource = mediaItems.map(_createAudioSource);
@@ -83,6 +93,21 @@ class MyAudioHandler extends BaseAudioHandler {
       await _player.shuffle();
       _player.setShuffleModeEnabled(true);
     }
+  }
+
+  @override
+  Future<void> removeQueueItemAt(int index) async {
+    // manage Just Audio
+    _playlist.removeAt(index);
+    // notify system
+    final newQueue = queue.value..removeAt(index);
+    queue.add(newQueue);
+  }
+
+  @override
+  Future<void> stop() async {
+    await _player.dispose();
+    super.stop();
   }
 
   void _notifyAudioHandlerAboutPlaybackEvents() {
