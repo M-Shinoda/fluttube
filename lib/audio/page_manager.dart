@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
-import 'notifiers/play_button_notifier.dart';
-import 'notifiers/progress_notifier.dart';
-import 'notifiers/repeat_button_notifier.dart';
+import '../notifiers/play_button_notifier.dart';
+import '../notifiers/progress_notifier.dart';
+import '../notifiers/repeat_button_notifier.dart';
 import 'package:audio_service/audio_service.dart';
-import 'services/playlist_repository.dart';
-import 'services/service_locator.dart';
+import '../services/playlist_repository.dart';
+import '../services/service_locator.dart';
 
 class PageManager {
   // Listeners: Updates going to the UI

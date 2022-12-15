@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fluttube/choice_view.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import 'models/choice.dart';
+import '../models/choice.dart';
+import 'choice_view.dart';
 
 class DownloadView extends HookConsumerWidget {
   const DownloadView({Key? key}) : super(key: key);

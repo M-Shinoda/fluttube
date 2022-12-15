@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import 'download_list.dart';
+import '../models/choice.dart';
+import '../states/download_list.dart';
 import 'list_card.dart';
-import 'models/choice.dart';
 
 class ChoiceView extends HookConsumerWidget {
   const ChoiceView({Key? key, required this.choice}) : super(key: key);

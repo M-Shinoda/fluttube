@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:fluttube/download_list.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:youtube_api/youtube_api.dart';
 
+import '../states/download_list.dart';
 import 'suggest_text_view.dart';
 
 String key = 'AIzaSyAM2qP2XwtD5-9C0q7F5mtCnTuk2VCn1xA';
