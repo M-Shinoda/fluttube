@@ -19,13 +19,15 @@ class DownloadCache {
   String url;
   String name;
   DateTime date;
-  DownloadCache(this.id, this.url, this.name, this.date);
+  String thumbnailUrl;
+  DownloadCache(this.id, this.url, this.name, this.date, this.thumbnailUrl);
 
   DownloadCache.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         url = json['url'],
         name = json['name'] as String,
-        date = DateTime.parse(json['date']);
+        date = DateTime.parse(json['date']),
+        thumbnailUrl = json['thumbnailUrl'];
 
   Map<String, dynamic> toJson() =>
       {'id': id, 'url': url, 'name': name, 'date': date.toIso8601String()};
@@ -75,7 +77,8 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     }
     status[index].completed = true;
     state = [..._list];
-    await _writeCache(index, status[index].url, fileName, DateTime.now());
+    await _writeCache(index, status[index].url, fileName, DateTime.now(),
+        video.thumbnails.maxResUrl);
     await fileStream.flush();
     await fileStream.close();
   }
@@ -93,10 +96,10 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
         .replaceAll('|', '');
   }
 
-  Future<void> _writeCache(
-      int id, String url, String name, DateTime date) async {
+  Future<void> _writeCache(int id, String url, String name, DateTime date,
+      String thumbnailUrl) async {
     final cacheList = await readCache();
-    cacheList.add(DownloadCache(id, url, name, date));
+    cacheList.add(DownloadCache(id, url, name, date, thumbnailUrl));
     cacheFile.writeAsString(json.encode(cacheList));
   }
 }

@@ -31,6 +31,7 @@ class DemoPlaylist extends PlaylistRepository {
       'title': title,
       'album': 'SoundHelix',
       'url': path,
+      'thumbnailUrl': 'https://i.ytimg.com/vi/e1xCOsgWG0M/mqdefault.jpg'
     };
   }
 }

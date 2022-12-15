@@ -38,6 +38,7 @@ class PageManager {
               album: song['album'] ?? '',
               title: song['title'] ?? '',
               extras: {'url': song['url']},
+              artUri: Uri.parse(song['thumbnailUrl'] ?? ''),
             ))
         .toList();
     await _audioHandler.addQueueItems(mediaItems);
@@ -165,6 +166,7 @@ class PageManager {
       album: song['album'] ?? '',
       title: song['title'] ?? '',
       extras: {'url': song['url']},
+      artUri: Uri.parse(song['thumbnailUrl'] ?? ''),
     );
     _audioHandler.addQueueItem(mediaItem);
   }
