@@ -50,6 +50,13 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     _id++;
   }
 
+  void setId(String id) async {
+    var yt = YoutubeExplode();
+    print(id);
+    var video = await yt.videos.get(id);
+    setUrl(video.url);
+  }
+
   void downloadProc(int index, List<UrlState> status) async {
     var yt = YoutubeExplode();
     var id = VideoId(status[index].url);

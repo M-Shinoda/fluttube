@@ -10,6 +10,8 @@ class DemoPlaylist extends PlaylistRepository {
   @override
   Future<List<Map<String, String>>> fetchInitialPlaylist(
       {int length = 1}) async {
+    length = dirM.listSync().length;
+
     return List.generate(length, (index) => _nextSong());
   }
 

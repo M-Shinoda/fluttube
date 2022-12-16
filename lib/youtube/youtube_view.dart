@@ -23,7 +23,7 @@ class YoutubeView extends HookConsumerWidget {
 
     final searchSnapshot = useMemoized(
         () async => searchText.value != ''
-            ? await ytApi.search(searchText.value)
+            ? await ytApi.search(searchText.value, type: 'video')
             : null,
         [searchText.value]);
     final searchResult = useFuture(searchSnapshot);

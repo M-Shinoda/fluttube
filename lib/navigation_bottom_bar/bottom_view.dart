@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../audio/audio.dart';
 import '../download/download_view.dart';
+import '../youtube/youtube_my_playlist.dart';
 import '../youtube/youtube_view.dart';
 
 class BottomView extends HookConsumerWidget {
@@ -13,6 +14,7 @@ class BottomView extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final _pageWidget = [
       const YoutubeView(),
+      const YoutubeMyPlaylist(),
       const AudioView(),
       const DownloadView()
     ];
@@ -36,6 +38,7 @@ class BottomView extends HookConsumerWidget {
         onTap: _onItemTapped,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Playlist"),
           BottomNavigationBarItem(
               icon: Icon(Icons.assignment_rounded), label: "Audio"),
           BottomNavigationBarItem(
