@@ -61,8 +61,9 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     setUrl(video.url);
   }
 
-  void setPlaylist(MyPlaylist playlist,
-      ValueNotifier<List<PlaylistItem>> playlistItems) async {
+  void setPlaylist(
+      MyPlaylist playlist, ValueNotifier<List<PlaylistItem>> playlistItems,
+      {bool isWriteCache = true}) async {
     final res = await http.get(Uri.parse(
         'https://www.googleapis.com/youtube/v3/playlistItems?key=AIzaSyCnIYbi-SOIJfaX4bm2JFJtC21dpCu_10Q&part=snippet,contentDetails,status,id&playlistId=${playlist.id}&maxResults=100'));
 
@@ -86,7 +87,7 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     for (var index in removeIndexlist) {
       playlistItems.value.removeAt(index);
     }
-    _writePlaylist(playlist.id, playlistItems.value);
+    if (isWriteCache) _writePlaylist(playlist.id, playlistItems.value);
   }
 
   void createPlayList(MyPlaylist playlist) {}
