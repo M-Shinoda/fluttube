@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import 'download_list.dart';
+import '../models/choice.dart';
+import '../states/download_list.dart';
 import 'list_card.dart';
-import 'models/choice.dart';
 
 class ChoiceView extends HookConsumerWidget {
   const ChoiceView({Key? key, required this.choice}) : super(key: key);
@@ -41,7 +41,7 @@ class ChoiceView extends HookConsumerWidget {
               ? ListCard(
                   items: [...dList.where((urlState) => !urlState.completed)])
               : fetchCache.data != null
-                  ? ListCacheCard(caches: [...fetchCache.data!])
+                  ? ListCacheCard(caches: [...fetchCache.data!.reversed])
                   : Container())
     ]);
   }

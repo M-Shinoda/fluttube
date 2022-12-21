@@ -1,6 +1,8 @@
 import 'dart:async';
-import 'package:fluttube/download_list.dart';
+
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+
+import '../states/download_list.dart';
 
 void sharingUrlProc(DownloadListStateNotifier notifier) {
   // ignore: unused_local_variable
