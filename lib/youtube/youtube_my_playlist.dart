@@ -3,26 +3,48 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:fluttube/youtube/youtube_view.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import '../states/download_list.dart';
 
-class Playlist {
+enum ThumbnailsRes {
+  def,
+  medium,
+  high,
+  standard,
+  maxres,
+}
+
+final Map<ThumbnailsRes, String> thumbnailsResName = {
+  ThumbnailsRes.def: 'default',
+  ThumbnailsRes.medium: 'medium',
+  ThumbnailsRes.high: 'high',
+  ThumbnailsRes.maxres: 'maxres',
+};
+
+class MyPlaylist {
   final String id;
   final String title;
   final String description;
   final String thumbnailUrl;
 
-  Playlist(this.id, this.title, this.description, this.thumbnailUrl);
+  MyPlaylist(this.id, this.title, this.description, this.thumbnailUrl);
 
-  Playlist.fromJson(Map<String, dynamic> json)
-      : id = json['id'] ?? '',
-        title = json['snippet']['localized']['title'] ?? '',
-        description = json['snippet']['localized']['description'] ?? '',
-        thumbnailUrl = json['snippet']['thumbnails']['maxres']['url'] ?? '';
+  MyPlaylist.fromJson(Map<String, dynamic> json)
+      : this(
+            json['id'] ?? '',
+            json['snippet']['localized']['title'] ?? '',
+            json['snippet']['localized']['description'] ?? '',
+            _choseThumbnailsRes(json, ThumbnailsRes.maxres));
+}
+
+_choseThumbnailsRes(Map<String, dynamic> json, ThumbnailsRes res) {
+  final choseRes = json['snippet']['thumbnails'][thumbnailsResName[res]];
+  if (choseRes == null) {
+    return _choseThumbnailsRes(json, ThumbnailsRes.values[res.index - 1]);
+  }
+  return choseRes['url'];
 }
 
 class PlaylistItem {
@@ -33,7 +55,13 @@ class PlaylistItem {
 
   PlaylistItem.fromJson(Map<String, dynamic> json)
       : id = json['contentDetails']['videoId'] ?? '',
+        title = composeFileName(json['snippet']['title'] ?? '');
+
+  PlaylistItem.fromStrageJson(Map<String, dynamic> json)
+      : id = json['id'] ?? '',
         title = json['title'] ?? '';
+
+  Map<String, dynamic> toJson() => {'id': id, 'title': title};
 }
 
 class YoutubeMyPlaylist extends HookConsumerWidget {
@@ -42,7 +70,7 @@ class YoutubeMyPlaylist extends HookConsumerWidget {
   @override
   build(BuildContext context, WidgetRef ref) {
     final dListNotifier = ref.read(downloadListProvider.notifier);
-    final playlists = useState<List<Playlist>>([]);
+    final playlists = useState<List<MyPlaylist>>([]);
     final playlistItems = useState<List<PlaylistItem>>([]);
     useEffect(() {
       Future.delayed(Duration.zero, () async {
@@ -52,11 +80,12 @@ class YoutubeMyPlaylist extends HookConsumerWidget {
         if (res.statusCode == 200) {
           try {
             final json = jsonDecode(utf8.decode(res.bodyBytes));
-            print(json['items']);
+            inspect(json['items']);
 
             playlists.value = (json['items'] as List<dynamic>)
-                .map((playlist) => Playlist.fromJson(playlist))
+                .map((playlist) => MyPlaylist.fromJson(playlist))
                 .toList();
+
             inspect(playlists.value);
           } catch (e) {
             print(e);
@@ -68,21 +97,11 @@ class YoutubeMyPlaylist extends HookConsumerWidget {
       return null;
     }, []);
 
-    final onTapCard = useCallback((Playlist playlist) async {
-      final res = await http.get(Uri.parse(
-          'https://www.googleapis.com/youtube/v3/playlistItems?key=AIzaSyCnIYbi-SOIJfaX4bm2JFJtC21dpCu_10Q&part=snippet,contentDetails,status,id&playlistId=${playlist.id}'));
-
-      final json = jsonDecode(utf8.decode(res.bodyBytes));
-      print(json['items']);
-
-      playlistItems.value = (json['items'] as List<dynamic>)
-          .map((item) => PlaylistItem.fromJson(item))
-          .toList();
-      inspect(playlistItems.value);
-      for (var item in playlistItems.value) {
-        dListNotifier.setId(item.id);
-      }
-    }, const []);
+    final onTapCard = useCallback(
+        (MyPlaylist playlist,
+                ValueNotifier<List<PlaylistItem>> playlistItems) async =>
+            dListNotifier.setPlaylist(playlist, playlistItems),
+        const []);
 
     return SafeArea(
         child: Container(
@@ -90,7 +109,7 @@ class YoutubeMyPlaylist extends HookConsumerWidget {
             child: Column(
                 children: playlists.value
                     .map((playlist) => InkWell(
-                        onTap: () => onTapCard(playlist),
+                        onTap: () => onTapCard(playlist, playlistItems),
                         child: Card(
                             child: Container(
                                 height: 50,

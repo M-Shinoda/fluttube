@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:fluttube/services/audio_handler.dart';
 import '../notifiers/play_button_notifier.dart';
 import '../notifiers/progress_notifier.dart';
 import '../notifiers/repeat_button_notifier.dart';
@@ -180,4 +181,7 @@ class PageManager {
   void dispose() {
     _audioHandler.stop();
   }
+
+  void switchingPlaylist(List<MediaItem> mediaItem) async =>
+      await (_audioHandler as MyAudioHandler).switchingPlaylist(mediaItem);
 }

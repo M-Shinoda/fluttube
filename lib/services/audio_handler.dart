@@ -59,6 +59,17 @@ class MyAudioHandler extends BaseAudioHandler {
     );
   }
 
+  Future<void> _removeAllQueueItem() async {
+    for (var index in List.generate(_playlist.length, (index) => index)) {
+      await removeQueueItemAt(0);
+    }
+  }
+
+  Future<void> switchingPlaylist(List<MediaItem> mediaItems) async {
+    await _removeAllQueueItem();
+    await addQueueItems(mediaItems);
+  }
+
   @override
   Future<void> play() => _player.play();
   @override

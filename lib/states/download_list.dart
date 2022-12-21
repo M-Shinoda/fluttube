@@ -1,10 +1,14 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import '../main.dart';
+import '../youtube/youtube_my_playlist.dart';
 
 class UrlState {
   int id;
@@ -57,6 +61,36 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     setUrl(video.url);
   }
 
+  void setPlaylist(MyPlaylist playlist,
+      ValueNotifier<List<PlaylistItem>> playlistItems) async {
+    final res = await http.get(Uri.parse(
+        'https://www.googleapis.com/youtube/v3/playlistItems?key=AIzaSyCnIYbi-SOIJfaX4bm2JFJtC21dpCu_10Q&part=snippet,contentDetails,status,id&playlistId=${playlist.id}&maxResults=100'));
+
+    final json = jsonDecode(utf8.decode(res.bodyBytes));
+
+    playlistItems.value = (json['items'] as List<dynamic>)
+        .map((item) => PlaylistItem.fromJson(item))
+        .toList();
+    inspect(playlistItems.value);
+    inspect(json);
+    var removeIndexlist = [];
+    playlistItems.value.asMap().forEach((index, item) {
+      print(item.id);
+      print(item.title);
+      if (item.title != 'Deleted video.mp3') {
+        setId(item.id);
+      } else {
+        removeIndexlist.add(index);
+      }
+    });
+    for (var index in removeIndexlist) {
+      playlistItems.value.removeAt(index);
+    }
+    _writePlaylist(playlist.id, playlistItems.value);
+  }
+
+  void createPlayList(MyPlaylist playlist) {}
+
   void downloadProc(int index, List<UrlState> status) async {
     var yt = YoutubeExplode();
     var id = VideoId(status[index].url);
@@ -64,7 +98,7 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     var manifest = await yt.videos.streamsClient.getManifest(id);
     var audio = manifest.audioOnly.firstWhere((item) => item.tag == 140);
     var bytes = audio.size.totalBytes;
-    var fileName = _composeFileName(video.title);
+    var fileName = composeFileName(video.title);
     print(fileName);
     var filePath = path.join(dirM.path, fileName);
     var file = File(filePath);
@@ -90,32 +124,66 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     await fileStream.close();
   }
 
-  // Compose the file name removing the unallowed characters in windows.
-  String _composeFileName(String title) {
-    return '$title.mp3'
-        .replaceAll(r'\', '')
-        .replaceAll('/', '')
-        .replaceAll('*', '')
-        .replaceAll('?', '')
-        .replaceAll('"', '')
-        .replaceAll('<', '')
-        .replaceAll('>', '')
-        .replaceAll('|', '');
-  }
-
   Future<void> _writeCache(int id, String url, String name, DateTime date,
       String thumbnailUrl) async {
     final cacheList = await readCache();
     cacheList.add(DownloadCache(id, url, name, date, thumbnailUrl));
     cacheFile.writeAsString(json.encode(cacheList));
   }
+
+  Future<void> _writePlaylist(
+      String playlistId, List<PlaylistItem> playlistItems) async {
+    final playlistItemList = await readPlaylist(playlistId);
+    for (var item in playlistItems) {
+      playlistItemList.add(item);
+    }
+    final playlistFile = await getPlaylistFile(playlistId);
+    playlistFile.writeAsString(json.encode(playlistItemList));
+  }
 }
 
 Future<List<DownloadCache>> readCache() async {
   var cacheString = await cacheFile.readAsString();
   if (cacheString == '') cacheString = '[]';
-  final cacheJson = json.decode(cacheString);
+  try {
+    final cacheJson = json.decode(cacheString);
+    print(cacheJson);
+    return [
+      ...(cacheJson as List<dynamic>)
+          .map((data) => DownloadCache.fromJson(data))
+    ];
+  } catch (e) {
+    print(e);
+    return [];
+  }
+}
+
+Future<File> getPlaylistFile(String playlistId) async {
+  return await File(Directory(dirP.uri.toFilePath()).path + '/$playlistId.txt')
+      .create(recursive: true);
+}
+
+Future<List<PlaylistItem>> readPlaylist(String playlistId) async {
+  final playlistFile = await getPlaylistFile(playlistId);
+
+  var playlistString = await playlistFile.readAsString();
+  if (playlistString == '') playlistString = '[]';
+  final playlistJson = json.decode(playlistString);
   return [
-    ...(cacheJson as List<dynamic>).map((data) => DownloadCache.fromJson(data))
+    ...(playlistJson as List<dynamic>)
+        .map((data) => PlaylistItem.fromStrageJson(data))
   ];
+}
+
+// Compose the file name removing the unallowed characters in windows.
+String composeFileName(String title) {
+  return '$title.mp3'
+      .replaceAll(r'\', '')
+      .replaceAll('/', '')
+      .replaceAll('*', '')
+      .replaceAll('?', '')
+      .replaceAll('"', '')
+      .replaceAll('<', '')
+      .replaceAll('>', '')
+      .replaceAll('|', '');
 }

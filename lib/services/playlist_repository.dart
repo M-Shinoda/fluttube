@@ -1,9 +1,12 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:fluttube/main.dart';
+import 'package:fluttube/states/download_list.dart';
 import 'package:path/path.dart';
 
 abstract class PlaylistRepository {
   Future<List<Map<String, String>>> fetchInitialPlaylist();
   Future<Map<String, String>> fetchAnotherSong();
+  Future<List<MediaItem>> fetchAnotherPlaylist(String playlistId);
 }
 
 class DemoPlaylist extends PlaylistRepository {
@@ -35,5 +38,24 @@ class DemoPlaylist extends PlaylistRepository {
       'url': path,
       'thumbnailUrl': 'https://i.ytimg.com/vi/e1xCOsgWG0M/mqdefault.jpg'
     };
+  }
+
+  @override
+  Future<List<MediaItem>> fetchAnotherPlaylist(String playlistId) async {
+    // final list = dirM.listSync();
+    final playlistItem = await readPlaylist(playlistId);
+    List<MediaItem> items = [];
+    playlistItem.asMap().forEach((index, item) {
+      // final playlistFile =
+      //     list.firstWhere((file) => basename(file.path) == item.title + '.mp3');
+      items.add(MediaItem(
+          id: index.toString().padLeft(3, '0'),
+          album: 'SoundHelix',
+          title: item.title,
+          extras: {'url': dirM.path + '/' + item.title},
+          artUri:
+              Uri.parse('https://i.ytimg.com/vi/e1xCOsgWG0M/mqdefault.jpg')));
+    });
+    return items;
   }
 }

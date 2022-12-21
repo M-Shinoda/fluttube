@@ -31,6 +31,7 @@ void main() async {
 late Directory dir;
 late Directory dirM;
 late File cacheFile;
+late Directory dirP;
 
 class MyApp extends HookConsumerWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -44,6 +45,8 @@ class MyApp extends HookConsumerWidget {
         await Permission.storage.request();
         dir = await DownloadsPathProvider.downloadsDirectory;
         dirM = await Directory(dir.uri.toFilePath() + 'Music')
+            .create(recursive: true);
+        dirP = await Directory(dir.uri.toFilePath() + 'Playlist')
             .create(recursive: true);
         cacheFile = await File(
                 Directory(dir.uri.toFilePath() + 'Cache').path + '/cache.txt')
