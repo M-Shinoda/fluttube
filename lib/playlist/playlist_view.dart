@@ -1,21 +1,14 @@
-import 'dart:convert';
-import 'dart:developer';
-
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:fluttube/main.dart';
 import 'package:fluttube/states/download_list.dart';
+import 'package:fluttube/utils/file_manage.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path/path.dart';
-import 'package:youtube_api/youtube_api.dart';
-import 'package:http/http.dart' as http;
 
 import '../audio/page_manager.dart';
 import '../services/playlist_repository.dart';
 import '../services/service_locator.dart';
 import '../youtube/youtube_my_playlist.dart';
-import '../youtube/youtube_view.dart';
 
 class PlaylisView extends HookConsumerWidget {
   const PlaylisView({Key? key}) : super(key: key);
@@ -25,7 +18,7 @@ class PlaylisView extends HookConsumerWidget {
     final dListNotifier = ref.read(downloadListProvider.notifier);
     final playlistItems = useState<List<PlaylistItem>>([]);
     final _playlistsCard = useMemoized(() async {
-      final playlists = dirP.listSync();
+      final playlists = FileManager().getDirPFileList();
       return playlists.map((playlist) => InkWell(
           onTap: () async {
             final songRepository = getIt<PlaylistRepository>();
@@ -57,7 +50,7 @@ class PlaylisView extends HookConsumerWidget {
                     alignment: Alignment.bottomRight,
                     child: FloatingActionButton(
                         onPressed: () async {
-                          final playlists = dirP.listSync();
+                          final playlists = FileManager().getDirPFileList();
                           for (var playlistFile in playlists) {
                             final playlistId = basename(playlistFile.path)
                                 .replaceFirst('.txt', '');

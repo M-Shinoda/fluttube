@@ -4,8 +4,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:fluttube/main.dart';
-import 'package:path/path.dart' as path;
+import 'package:fluttube/utils/file_manage.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:permission_handler/permission_handler.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -48,8 +47,7 @@ Future<String> download(BuildContext context, [String? url]) async {
   return fileName;
   var filePath =
       // path.join(dirM.path, '${video.id}.${audio.container.name}');
-      path.join(dirM.path, fileName);
-
+      FileManager().dirMJoin(fileName);
   // Open the file to write.
   var file = File(filePath);
   var fileStream = file.openWrite();
