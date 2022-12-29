@@ -8,35 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
+import '../models/url_state.dart';
 import '../utils/file_manage.dart';
 import '../youtube/youtube_my_playlist.dart';
-
-class UrlState {
-  int id;
-  String url;
-  bool completed;
-  double progress;
-  UrlState(this.id, this.url, this.completed, this.progress);
-}
-
-class DownloadCache {
-  int id;
-  String url;
-  String name;
-  DateTime date;
-  String thumbnailUrl;
-  DownloadCache(this.id, this.url, this.name, this.date, this.thumbnailUrl);
-
-  DownloadCache.fromJson(Map<String, dynamic> json)
-      : id = json['id'],
-        url = json['url'],
-        name = json['name'] as String,
-        date = DateTime.parse(json['date']),
-        thumbnailUrl = json['thumbnailUrl'];
-
-  Map<String, dynamic> toJson() =>
-      {'id': id, 'url': url, 'name': name, 'date': date.toIso8601String()};
-}
 
 final downloadListProvider =
     StateNotifierProvider<DownloadListStateNotifier, List<UrlState>>((_) {

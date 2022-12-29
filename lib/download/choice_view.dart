@@ -5,6 +5,7 @@ import 'package:fluttube/utils/file_manage.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../models/choice.dart';
+import '../models/download_cache.dart';
 import '../states/download_list.dart';
 import 'list_card.dart';
 

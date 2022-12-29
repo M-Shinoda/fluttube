@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../states/download_list.dart';
+import '../models/download_cache.dart';
+import '../models/url_state.dart';
 
 class ListCard extends HookWidget {
   final List<UrlState> items;
