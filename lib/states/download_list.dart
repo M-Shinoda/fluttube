@@ -1,6 +1,8 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
@@ -44,13 +46,16 @@ final downloadListProvider =
 
 List<UrlState> _list = [];
 int _id = 0;
+var downloadQueue = Queue<int>();
+var semaphore = false;
 
 class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
   DownloadListStateNotifier() : super(_list);
   void setUrl(String url) {
     _list.add(UrlState(_id, url, false, 0.0));
     state = [..._list];
-    downloadProc(_id, _list);
+    downloadQueue.add(_id);
+    executeQueue();
     _id++;
   }
 
@@ -92,7 +97,23 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
 
   void createPlayList(MyPlaylist playlist) {}
 
-  void downloadProc(int index, List<UrlState> status) async {
+  void executeQueue() async {
+    if (downloadQueue.isNotEmpty && !semaphore) {
+      semaphore = true;
+      try {
+        await downloadProc(downloadQueue.first, state);
+      } catch (e) {
+        print(e);
+      }
+      downloadQueue.removeFirst();
+      semaphore = false;
+      if (downloadQueue.isNotEmpty) {
+        executeQueue();
+      }
+    }
+  }
+
+  Future<void> downloadProc(int index, List<UrlState> status) async {
     var yt = YoutubeExplode();
     var id = VideoId(status[index].url);
     var video = await yt.videos.get(id);

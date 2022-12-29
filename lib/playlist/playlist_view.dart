@@ -66,7 +66,6 @@ class PlaylisView extends HookConsumerWidget {
                                 MyPlaylist(playlistId, '', '', ''),
                                 playlistItems,
                                 isWriteCache: false);
-                            await Future.delayed(Duration(seconds: 20));
                           }
                         },
                         child: const Icon(Icons.add)))
