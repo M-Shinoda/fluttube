@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../audio/audio.dart';
 import '../download/download_view.dart';
 import '../playlist/playlist_view.dart';
+import '../states/download_list.dart';
 import '../youtube/youtube_my_playlist.dart';
 import '../youtube/youtube_view.dart';
 
@@ -13,6 +14,7 @@ class BottomView extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final dList = ref.watch(downloadListProvider);
     final _pageWidget = [
       const YoutubeView(),
       const YoutubeMyPlaylist(),
@@ -28,6 +30,14 @@ class BottomView extends HookConsumerWidget {
           duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
     }
 
+    final downloadingCount = useMemoized(() {
+      int count = 0;
+      for (var state in dList) {
+        if (!state.completed) count++;
+      }
+      return count.toString();
+    }, [dList]);
+
     return Scaffold(
       body: PageView(
         // physics: NeverScrollableScrollPhysics(),
@@ -38,15 +48,21 @@ class BottomView extends HookConsumerWidget {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex.value,
         onTap: _onItemTapped,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(
+        items: <BottomNavigationBarItem>[
+          const BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          const BottomNavigationBarItem(
               icon: Icon(Icons.home), label: "Playlist(YT)"),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
               icon: Icon(Icons.assignment_rounded), label: "Audio"),
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Playlist"),
+          const BottomNavigationBarItem(
+              icon: Icon(Icons.home), label: "Playlist"),
           BottomNavigationBarItem(
-              icon: Icon(Icons.account_balance_wallet_rounded),
+              icon: Stack(
+                children: [
+                  const Icon(Icons.account_balance_wallet_rounded),
+                  Text(downloadingCount)
+                ],
+              ),
               label: "Download"),
         ],
         type: BottomNavigationBarType.fixed,

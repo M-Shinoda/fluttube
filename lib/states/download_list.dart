@@ -17,24 +17,42 @@ final downloadListProvider =
   return DownloadListStateNotifier();
 });
 
-List<UrlState> _list = [];
-int _id = 0;
 var downloadQueue = Queue<int>();
 var semaphore = false;
 
 class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
-  DownloadListStateNotifier() : super(_list);
+  DownloadListStateNotifier() : super([]);
+
+  int _id = 0;
+  final yt = YoutubeExplode();
+
+  void _changeStateObject(List<UrlState> newState) {
+    state = [...newState];
+  }
+
+  void _addState(UrlState urlState) {
+    state.add(urlState);
+    _changeStateObject(state);
+  }
+
+  void _updateProgress(int index, double progress) {
+    state[index].progress = progress;
+    _changeStateObject(state);
+  }
+
+  void _updateCompleted(int index, bool completed) {
+    state[index].completed = completed;
+    _changeStateObject(state);
+  }
+
   void setUrl(String url) {
-    _list.add(UrlState(_id, url, false, 0.0));
-    state = [..._list];
+    _addState(UrlState(_id, url, false, 0.0));
     downloadQueue.add(_id);
-    executeQueue();
+    _executeQueue();
     _id++;
   }
 
   void setId(String id) async {
-    var yt = YoutubeExplode();
-    print(id);
     var video = await yt.videos.get(id);
     setUrl(video.url);
   }
@@ -72,7 +90,7 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
 
   void createPlayList(MyPlaylist playlist) {}
 
-  void executeQueue() async {
+  void _executeQueue() async {
     if (downloadQueue.isNotEmpty && !semaphore) {
       semaphore = true;
       try {
@@ -83,13 +101,12 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
       downloadQueue.removeFirst();
       semaphore = false;
       if (downloadQueue.isNotEmpty) {
-        executeQueue();
+        _executeQueue();
       }
     }
   }
 
   Future<void> downloadProc(int index, List<UrlState> status) async {
-    var yt = YoutubeExplode();
     var id = VideoId(status[index].url);
     var video = await yt.videos.get(id);
     var manifest = await yt.videos.streamsClient.getManifest(id);
@@ -108,13 +125,10 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
       count += data.length;
 
       progress = count / bytes;
-      print(progress);
-      status[index].progress = progress;
-      state = [..._list];
+      _updateProgress(index, progress);
       fileStream.add(data);
     }
-    status[index].completed = true;
-    state = [..._list];
+    _updateCompleted(index, true);
     await FileManager().writeCache(index, status[index].url, fileName,
         DateTime.now(), video.thumbnails.maxResUrl);
     await fileStream.flush();
