@@ -106,19 +106,12 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     }
   }
 
-  Future<void> downloadProc(int index, List<UrlState> status) async {
-    var id = VideoId(status[index].url);
-    var video = await yt.videos.get(id);
-    var manifest = await yt.videos.streamsClient.getManifest(id);
-    var audio = manifest.audioOnly.firstWhere((item) => item.tag == 140);
+  Future<void> _download(File file, VideoId id, int index) async {
+    final fileStream = file.openWrite();
+    final manifest = await yt.videos.streamsClient.getManifest(id);
+    final audio = manifest.audioOnly.firstWhere((item) => item.tag == 140);
     var bytes = audio.size.totalBytes;
-    var fileName = FileManager().composeFileNameAndExt(video.title);
-    print(fileName);
-    var filePath = FileManager().dirMJoin(fileName);
-    var file = File(filePath);
-    var fileStream = file.openWrite();
-
-    var audioStream = yt.videos.streamsClient.get(audio);
+    final audioStream = yt.videos.streamsClient.get(audio);
     var count = 0;
     double progress = 0.0;
     await for (final data in audioStream) {
@@ -128,10 +121,20 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
       _updateProgress(index, progress);
       fileStream.add(data);
     }
+    await fileStream.flush();
+    await fileStream.close();
+  }
+
+  Future<void> downloadProc(int index, List<UrlState> status) async {
+    final id = VideoId(status[index].url);
+    final video = await yt.videos.get(id);
+    final fileName = FileManager().composeFileNameAndExt(video.title);
+    var filePath = FileManager().dirMJoin(fileName);
+    var file = File(filePath);
+    await _download(file, id, index);
+
     _updateCompleted(index, true);
     await FileManager().writeCache(index, status[index].url, fileName,
         DateTime.now(), video.thumbnails.maxResUrl);
-    await fileStream.flush();
-    await fileStream.close();
   }
 }
