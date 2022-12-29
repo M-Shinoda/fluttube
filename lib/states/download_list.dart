@@ -1,6 +1,8 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
@@ -44,13 +46,16 @@ final downloadListProvider =
 
 List<UrlState> _list = [];
 int _id = 0;
+var downloadQueue = Queue<int>();
+var semaphore = false;
 
 class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
   DownloadListStateNotifier() : super(_list);
   void setUrl(String url) {
     _list.add(UrlState(_id, url, false, 0.0));
     state = [..._list];
-    downloadProc(_id, _list);
+    downloadQueue.add(_id);
+    executeQueue();
     _id++;
   }
 
@@ -61,8 +66,9 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     setUrl(video.url);
   }
 
-  void setPlaylist(MyPlaylist playlist,
-      ValueNotifier<List<PlaylistItem>> playlistItems) async {
+  void setPlaylist(
+      MyPlaylist playlist, ValueNotifier<List<PlaylistItem>> playlistItems,
+      {bool isWriteCache = true}) async {
     final res = await http.get(Uri.parse(
         'https://www.googleapis.com/youtube/v3/playlistItems?key=AIzaSyCnIYbi-SOIJfaX4bm2JFJtC21dpCu_10Q&part=snippet,contentDetails,status,id&playlistId=${playlist.id}&maxResults=100'));
 
@@ -86,12 +92,28 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     for (var index in removeIndexlist) {
       playlistItems.value.removeAt(index);
     }
-    _writePlaylist(playlist.id, playlistItems.value);
+    if (isWriteCache) _writePlaylist(playlist.id, playlistItems.value);
   }
 
   void createPlayList(MyPlaylist playlist) {}
 
-  void downloadProc(int index, List<UrlState> status) async {
+  void executeQueue() async {
+    if (downloadQueue.isNotEmpty && !semaphore) {
+      semaphore = true;
+      try {
+        await downloadProc(downloadQueue.first, state);
+      } catch (e) {
+        print(e);
+      }
+      downloadQueue.removeFirst();
+      semaphore = false;
+      if (downloadQueue.isNotEmpty) {
+        executeQueue();
+      }
+    }
+  }
+
+  Future<void> downloadProc(int index, List<UrlState> status) async {
     var yt = YoutubeExplode();
     var id = VideoId(status[index].url);
     var video = await yt.videos.get(id);
