@@ -5,11 +5,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
-import '../main.dart';
+import '../utils/file_manage.dart';
 import '../youtube/youtube_my_playlist.dart';
 
 class UrlState {
@@ -92,7 +91,9 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     for (var index in removeIndexlist) {
       playlistItems.value.removeAt(index);
     }
-    if (isWriteCache) _writePlaylist(playlist.id, playlistItems.value);
+    if (isWriteCache) {
+      FileManager().writePlaylist(playlist.id, playlistItems.value);
+    }
   }
 
   void createPlayList(MyPlaylist playlist) {}
@@ -120,9 +121,9 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     var manifest = await yt.videos.streamsClient.getManifest(id);
     var audio = manifest.audioOnly.firstWhere((item) => item.tag == 140);
     var bytes = audio.size.totalBytes;
-    var fileName = composeFileName(video.title);
+    var fileName = FileManager().composeFileNameAndExt(video.title);
     print(fileName);
-    var filePath = path.join(dirM.path, fileName);
+    var filePath = FileManager().dirMJoin(fileName);
     var file = File(filePath);
     var fileStream = file.openWrite();
 
@@ -140,72 +141,9 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     }
     status[index].completed = true;
     state = [..._list];
-    await _writeCache(index, status[index].url, fileName, DateTime.now(),
-        video.thumbnails.maxResUrl);
+    await FileManager().writeCache(index, status[index].url, fileName,
+        DateTime.now(), video.thumbnails.maxResUrl);
     await fileStream.flush();
     await fileStream.close();
   }
-
-  Future<void> _writeCache(int id, String url, String name, DateTime date,
-      String thumbnailUrl) async {
-    final cacheList = await readCache();
-    cacheList.add(DownloadCache(id, url, name, date, thumbnailUrl));
-    cacheFile.writeAsString(json.encode(cacheList));
-  }
-
-  Future<void> _writePlaylist(
-      String playlistId, List<PlaylistItem> playlistItems) async {
-    final playlistItemList = await readPlaylist(playlistId);
-    for (var item in playlistItems) {
-      playlistItemList.add(item);
-    }
-    final playlistFile = await getPlaylistFile(playlistId);
-    playlistFile.writeAsString(json.encode(playlistItemList));
-  }
-}
-
-Future<List<DownloadCache>> readCache() async {
-  var cacheString = await cacheFile.readAsString();
-  if (cacheString == '') cacheString = '[]';
-  try {
-    final cacheJson = json.decode(cacheString);
-    print(cacheJson);
-    return [
-      ...(cacheJson as List<dynamic>)
-          .map((data) => DownloadCache.fromJson(data))
-    ];
-  } catch (e) {
-    print(e);
-    return [];
-  }
-}
-
-Future<File> getPlaylistFile(String playlistId) async {
-  return await File(Directory(dirP.uri.toFilePath()).path + '/$playlistId.txt')
-      .create(recursive: true);
-}
-
-Future<List<PlaylistItem>> readPlaylist(String playlistId) async {
-  final playlistFile = await getPlaylistFile(playlistId);
-
-  var playlistString = await playlistFile.readAsString();
-  if (playlistString == '') playlistString = '[]';
-  final playlistJson = json.decode(playlistString);
-  return [
-    ...(playlistJson as List<dynamic>)
-        .map((data) => PlaylistItem.fromStrageJson(data))
-  ];
-}
-
-// Compose the file name removing the unallowed characters in windows.
-String composeFileName(String title) {
-  return '$title.mp3'
-      .replaceAll(r'\', '')
-      .replaceAll('/', '')
-      .replaceAll('*', '')
-      .replaceAll('?', '')
-      .replaceAll('"', '')
-      .replaceAll('<', '')
-      .replaceAll('>', '')
-      .replaceAll('|', '');
 }

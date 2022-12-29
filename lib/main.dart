@@ -1,13 +1,8 @@
-import 'dart:io';
-
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:downloads_path_provider/downloads_path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:fluttube/utils/file_manage.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:permission_handler/permission_handler.dart';
 
 import 'audio/page_manager.dart';
 import 'components/utils.dart';
@@ -28,11 +23,6 @@ void main() async {
   );
 }
 
-late Directory dir;
-late Directory dirM;
-late File cacheFile;
-late Directory dirP;
-
 class MyApp extends HookConsumerWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -42,15 +32,11 @@ class MyApp extends HookConsumerWidget {
 
     useEffect(() {
       Future.delayed(Duration.zero, () async {
-        await Permission.storage.request();
-        dir = await DownloadsPathProvider.downloadsDirectory;
-        dirM = await Directory(dir.uri.toFilePath() + 'Music')
-            .create(recursive: true);
-        dirP = await Directory(dir.uri.toFilePath() + 'Playlist')
-            .create(recursive: true);
-        cacheFile = await File(
-                Directory(dir.uri.toFilePath() + 'Cache').path + '/cache.txt')
-            .create(recursive: true);
+        await FileManager().init(
+            musicFolderName: 'Music',
+            playlistSaveFolderName: 'Playlist',
+            cacheFolderName: 'Cache');
+
         sharingUrlProc(dListNotifier);
         getIt<PageManager>().init();
       });

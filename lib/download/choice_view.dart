@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:fluttube/utils/file_manage.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../models/choice.dart';
@@ -30,7 +31,7 @@ class ChoiceView extends HookConsumerWidget {
         useMemoized(() async {
       if (updator.value == 0) return [];
       print('fetch');
-      return await readCache();
+      return await FileManager().readCache();
     }, [updator.value]);
 
     final fetchCache = useFuture(featchCacheSnapshot);

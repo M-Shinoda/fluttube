@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
 
 import '../states/download_list.dart';
+import '../utils/file_manage.dart';
 
 enum ThumbnailsRes {
   def,
@@ -55,7 +56,8 @@ class PlaylistItem {
 
   PlaylistItem.fromJson(Map<String, dynamic> json)
       : id = json['contentDetails']['videoId'] ?? '',
-        title = composeFileName(json['snippet']['title'] ?? '');
+        title =
+            FileManager().composeFileNameAndExt(json['snippet']['title'] ?? '');
 
   PlaylistItem.fromStrageJson(Map<String, dynamic> json)
       : id = json['id'] ?? '',
