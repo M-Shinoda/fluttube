@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttube/utils/file_manage.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:yt/yt.dart';
 
 import 'audio/page_manager.dart';
 import 'components/utils.dart';
@@ -39,6 +40,9 @@ class MyApp extends HookConsumerWidget {
 
         sharingUrlProc(dListNotifier);
         getIt<PageManager>().init();
+        final yt = await Yt.withOAuth(
+            oAuthClientId:
+                OAuthCredentials.fromYaml('credentials.yaml').oAuthClientId);
       });
       return () {
         getIt<PageManager>().dispose();
