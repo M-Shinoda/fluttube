@@ -21,10 +21,8 @@ class PlaylisView extends HookConsumerWidget {
       final playlists = FileManager().getDirPFileList();
       return playlists.map((playlist) => InkWell(
           onTap: () async {
-            final songRepository = getIt<PlaylistRepository>();
-            final pageManager = getIt<PageManager>();
-            pageManager.switchingPlaylist(
-                await songRepository.fetchAnotherPlaylist(
+            getIt<PageManager>().switchingPlaylist(
+                await getIt<PlaylistRepository>().fetchAnotherPlaylist(
                     basename(playlist.path).replaceFirst('.txt', '')));
           },
           child: Card(

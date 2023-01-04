@@ -41,12 +41,9 @@ class DemoPlaylist extends PlaylistRepository {
 
   @override
   Future<List<MediaItem>> fetchAnotherPlaylist(String playlistId) async {
-    // final list = dirM.listSync();
     final playlistItem = await FileManager().readPlaylist(playlistId);
     List<MediaItem> items = [];
     playlistItem.asMap().forEach((index, item) {
-      // final playlistFile =
-      //     list.firstWhere((file) => basename(file.path) == item.title + '.mp3');
       items.add(MediaItem(
           id: index.toString().padLeft(3, '0'),
           album: 'SoundHelix',
