@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:fluttube/youtube/youtube_my_playlist.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:youtube_api/youtube_api.dart';
 
+import '../models/youtube_model.dart';
 import '../states/download_list.dart';
 import 'suggest_text_view.dart';
 

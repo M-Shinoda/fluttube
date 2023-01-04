@@ -6,9 +6,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path/path.dart';
 
 import '../audio/page_manager.dart';
+import '../models/youtube_model.dart';
 import '../services/playlist_repository.dart';
 import '../services/service_locator.dart';
-import '../youtube/youtube_my_playlist.dart';
 
 class PlaylisView extends HookConsumerWidget {
   const PlaylisView({Key? key}) : super(key: key);

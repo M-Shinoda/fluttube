@@ -9,8 +9,8 @@ import 'package:http/http.dart' as http;
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import '../models/url_state.dart';
+import '../models/youtube_model.dart';
 import '../utils/file_manage.dart';
-import '../youtube/youtube_my_playlist.dart';
 
 final downloadListProvider =
     StateNotifierProvider<DownloadListStateNotifier, List<UrlState>>((_) {

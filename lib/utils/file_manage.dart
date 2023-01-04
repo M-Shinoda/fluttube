@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as path;
 
 import '../models/download_cache.dart';
+import '../models/youtube_model.dart';
 import '../youtube/youtube_my_playlist.dart';
 
 class FileManager {
