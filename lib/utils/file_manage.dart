@@ -8,7 +8,6 @@ import 'package:path/path.dart' as path;
 
 import '../models/download_cache.dart';
 import '../models/youtube_model.dart';
-import '../youtube/youtube_my_playlist.dart';
 
 class FileManager {
   static FileManager? _fileManager;
