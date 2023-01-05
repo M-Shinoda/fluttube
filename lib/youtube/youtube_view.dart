@@ -76,13 +76,6 @@ class YoutubeView extends HookConsumerWidget {
       }
     }, [suggestSearch.value, isVisibleSuggestText.value]);
 
-    // useEffect(() {
-    //   Future.delayed(Duration.zero, () async {
-    //     final a = await ytApi.nextPage();
-    //     inspect(a);
-    //   });
-    // }, [searchResult.data]);
-
     Widget _searchTextField() {
       return Container(
           padding: const EdgeInsets.only(top: 30),
@@ -164,13 +157,4 @@ Widget videoCard(SearchResult item, DownloadListStateNotifier dListNotifier,
                 child:
                     Text(item.snippet!.title, overflow: TextOverflow.ellipsis))
           ])));
-}
-
-Widget suggestTextContent(String suggest) {
-  return Container(
-      height: 20,
-      decoration: const BoxDecoration(
-          color: Colors.white60,
-          borderRadius: BorderRadius.all(Radius.circular(30))),
-      child: Text(suggest));
 }
