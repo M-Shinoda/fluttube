@@ -58,7 +58,7 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
   }
 
   void setPlaylist(
-      MyPlaylist playlist, ValueNotifier<List<PlaylistItem>> playlistItems,
+      MyPlaylist playlist, ValueNotifier<List<MyPlaylistItem>> playlistItems,
       {bool isWriteCache = true}) async {
     final res = await http.get(Uri.parse(
         'https://www.googleapis.com/youtube/v3/playlistItems?key=AIzaSyCnIYbi-SOIJfaX4bm2JFJtC21dpCu_10Q&part=snippet,contentDetails,status,id&playlistId=${playlist.id}&maxResults=100'));
@@ -66,7 +66,7 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     final json = jsonDecode(utf8.decode(res.bodyBytes));
 
     playlistItems.value = (json['items'] as List<dynamic>)
-        .map((item) => PlaylistItem.fromJson(item))
+        .map((item) => MyPlaylistItem.fromJson(item))
         .toList();
     inspect(playlistItems.value);
     inspect(json);

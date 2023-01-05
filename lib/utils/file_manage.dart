@@ -69,7 +69,7 @@ class FileManager {
   }
 
   // プレイリスト一覧を読み込む
-  Future<List<PlaylistItem>> readPlaylist(String playlistId) async {
+  Future<List<MyPlaylistItem>> readPlaylist(String playlistId) async {
     final playlistFile = await getPlaylistFile(playlistId);
 
     var playlistString = await playlistFile.readAsString();
@@ -77,7 +77,7 @@ class FileManager {
     final playlistJson = json.decode(playlistString);
     return [
       ...(playlistJson as List<dynamic>)
-          .map((data) => PlaylistItem.fromStrageJson(data))
+          .map((data) => MyPlaylistItem.fromStrageJson(data))
     ];
   }
 
@@ -90,7 +90,7 @@ class FileManager {
 
   // プレイリストの書き込み
   Future<void> writePlaylist(
-      String playlistId, List<PlaylistItem> playlistItems) async {
+      String playlistId, List<MyPlaylistItem> playlistItems) async {
     final playlistItemList = await readPlaylist(playlistId);
     for (var item in playlistItems) {
       playlistItemList.add(item);

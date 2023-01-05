@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:youtube_api/youtube_api.dart';
+import 'package:yt/yt.dart';
 
 import '../models/youtube_model.dart';
 import '../states/download_list.dart';
+import '../utils/youtube_api.dart';
 import 'suggest_text_view.dart';
 
 String key = 'AIzaSyAM2qP2XwtD5-9C0q7F5mtCnTuk2VCn1xA';
-YoutubeAPI ytApi = YoutubeAPI(key, maxResults: 30);
-List<YouTubeVideo> videoResult = [];
 
 class YoutubeView extends HookConsumerWidget {
   const YoutubeView({Key? key}) : super(key: key);
@@ -24,7 +23,7 @@ class YoutubeView extends HookConsumerWidget {
     final searchVideo = useState(false);
     final searchPlaylist = useState(true);
     final searchChannel = useState(false);
-    final playlistItems = useState<List<PlaylistItem>>([]);
+    final playlistItems = useState<List<MyPlaylistItem>>([]);
 
     final searchType = useMemoized(() {
       List<String> type = [];
@@ -38,7 +37,7 @@ class YoutubeView extends HookConsumerWidget {
 
     final searchSnapshot = useMemoized(
         () async => searchText.value != ''
-            ? await ytApi.search(searchText.value, type: searchType)
+            ? await ytApi.search.list(q: searchText.value, type: searchType)
             : null,
         [searchText.value, searchType]);
     final searchResult = useFuture(searchSnapshot);
@@ -130,7 +129,7 @@ class YoutubeView extends HookConsumerWidget {
         SingleChildScrollView(
             child: Column(children: [
           if (searchResult.hasData)
-            ...searchResult.data!
+            ...searchResult.data!.items
                 .map((item) => videoCard(item, dListNotifier, playlistItems))
         ])),
         _suggestList()
@@ -139,15 +138,18 @@ class YoutubeView extends HookConsumerWidget {
   }
 }
 
-Widget videoCard(YouTubeVideo item, DownloadListStateNotifier dListNotifier,
-    ValueNotifier<List<PlaylistItem>> playlistItems) {
+Widget videoCard(SearchResult item, DownloadListStateNotifier dListNotifier,
+    ValueNotifier<List<MyPlaylistItem>> playlistItems) {
   return GestureDetector(
       onTap: () {
-        if (item.kind == 'video') dListNotifier.setUrl(item.url);
+        if (item.kind == 'video') dListNotifier.setId(item.id.videoId!);
         if (item.kind == 'playlist') {
           dListNotifier.setPlaylist(
-              MyPlaylist(item.id ?? '', item.title, item.description ?? '',
-                  item.thumbnail.high.url ?? ''),
+              MyPlaylist(
+                  item.id.playlistId ?? '',
+                  item.snippet!.title,
+                  item.snippet?.description ?? '',
+                  item.snippet?.thumbnails.high?.url ?? ''),
               playlistItems);
         }
 
@@ -157,8 +159,10 @@ Widget videoCard(YouTubeVideo item, DownloadListStateNotifier dListNotifier,
           color: Colors.black12,
           margin: const EdgeInsets.all(10),
           child: Row(children: [
-            Image.network(item.thumbnail.medium.url!, width: 70),
-            Expanded(child: Text(item.title, overflow: TextOverflow.ellipsis))
+            Image.network(item.snippet!.thumbnails.medium!.url, width: 70),
+            Expanded(
+                child:
+                    Text(item.snippet!.title, overflow: TextOverflow.ellipsis))
           ])));
 }
 

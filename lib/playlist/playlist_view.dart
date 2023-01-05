@@ -16,7 +16,7 @@ class PlaylisView extends HookConsumerWidget {
   @override
   build(BuildContext context, WidgetRef ref) {
     final dListNotifier = ref.read(downloadListProvider.notifier);
-    final playlistItems = useState<List<PlaylistItem>>([]);
+    final playlistItems = useState<List<MyPlaylistItem>>([]);
     final _playlistsCard = useMemoized(() async {
       final playlists = FileManager().getDirPFileList();
       return playlists.map((playlist) => InkWell(

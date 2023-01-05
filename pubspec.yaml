@@ -40,8 +40,8 @@ dependencies:
   audio_video_progress_bar: ^0.10.0
   just_audio: ^0.9.28
   audio_service: ^0.18.7
-  youtube_api: ^1.0.4
   on_audio_edit: ^1.5.1
+  yt: ^2.0.6+8
 
 
 

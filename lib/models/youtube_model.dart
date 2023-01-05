@@ -15,18 +15,18 @@ final Map<ThumbnailsRes, String> thumbnailsResName = {
   ThumbnailsRes.maxres: 'maxres',
 };
 
-class PlaylistItem {
+class MyPlaylistItem {
   final String id;
   final String title;
 
-  PlaylistItem(this.id, this.title);
+  MyPlaylistItem(this.id, this.title);
 
-  PlaylistItem.fromJson(Map<String, dynamic> json)
+  MyPlaylistItem.fromJson(Map<String, dynamic> json)
       : id = json['contentDetails']['videoId'] ?? '',
         title =
             FileManager().composeFileNameAndExt(json['snippet']['title'] ?? '');
 
-  PlaylistItem.fromStrageJson(Map<String, dynamic> json)
+  MyPlaylistItem.fromStrageJson(Map<String, dynamic> json)
       : id = json['id'] ?? '',
         title = json['title'] ?? '';
 

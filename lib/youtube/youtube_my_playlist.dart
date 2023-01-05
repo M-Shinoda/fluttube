@@ -12,14 +12,14 @@ class YoutubeMyPlaylist extends HookConsumerWidget {
   @override
   build(BuildContext context, WidgetRef ref) {
     final dListNotifier = ref.read(downloadListProvider.notifier);
-    final playlistItems = useState<List<PlaylistItem>>([]);
+    final playlistItems = useState<List<MyPlaylistItem>>([]);
     final _playlistsSnapshot =
         useMemoized(() => getMyChannelPlaylistOnlyPublic(), const []);
     final playlistsSnapshot = useFuture(_playlistsSnapshot);
 
     final onTapCard = useCallback(
         (MyPlaylist playlist,
-                ValueNotifier<List<PlaylistItem>> playlistItems) async =>
+                ValueNotifier<List<MyPlaylistItem>> playlistItems) async =>
             dListNotifier.setPlaylist(playlist, playlistItems),
         const []);
 
