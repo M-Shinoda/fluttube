@@ -117,10 +117,10 @@ class FileManager {
   }
 
   // キャッシュの書き込み
-  Future<void> writeCache(int id, String url, String name, DateTime date,
-      String thumbnailUrl) async {
+  Future<void> writeCache(
+      String id, String name, DateTime date, String thumbnailUrl) async {
     final cacheList = await readCache();
-    cacheList.add(DownloadCache(id, url, name, date, thumbnailUrl));
+    cacheList.add(DownloadCache(id, name, date, thumbnailUrl));
     _cacheFile.writeAsString(json.encode(cacheList));
   }
 

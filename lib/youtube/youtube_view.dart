@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:fluttube/main.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:yt/yt.dart';
 
@@ -23,7 +26,6 @@ class YoutubeView extends HookConsumerWidget {
     final searchVideo = useState(false);
     final searchPlaylist = useState(true);
     final searchChannel = useState(false);
-    final playlistItems = useState<List<MyPlaylistItem>>([]);
 
     final searchType = useMemoized(() {
       List<String> type = [];
@@ -122,8 +124,8 @@ class YoutubeView extends HookConsumerWidget {
         SingleChildScrollView(
             child: Column(children: [
           if (searchResult.hasData)
-            ...searchResult.data!.items
-                .map((item) => videoCard(item, dListNotifier, playlistItems))
+            ...searchResult.data!.items.map(
+                (item) => videoCard(ExtendsSearchResult(item), dListNotifier))
         ])),
         _suggestList()
       ]))
@@ -131,22 +133,33 @@ class YoutubeView extends HookConsumerWidget {
   }
 }
 
-Widget videoCard(SearchResult item, DownloadListStateNotifier dListNotifier,
-    ValueNotifier<List<MyPlaylistItem>> playlistItems) {
+Widget videoCard(
+  ExtendsSearchResult item,
+  DownloadListStateNotifier dListNotifier,
+) {
+  inspect(item);
   return GestureDetector(
       onTap: () {
-        if (item.kind == 'video') dListNotifier.setId(item.id.videoId!);
-        if (item.kind == 'playlist') {
-          dListNotifier.setPlaylist(
-              MyPlaylist(
-                  item.id.playlistId ?? '',
-                  item.snippet!.title,
-                  item.snippet?.description ?? '',
-                  item.snippet?.thumbnails.high?.url ?? ''),
-              playlistItems);
+        if (item.itemKind == ItemKind.channel) return;
+        if (item.itemKind == ItemKind.none) return;
+
+        if (item.itemKind == ItemKind.playlist ||
+            item.itemKind == ItemKind.video) {
+          dListNotifier.setSearchResult(item);
         }
 
-        if (item.kind == 'channel') return;
+        // if (item.id.kind == 'youtube#video') {
+        //   dListNotifier.setId(item.id.videoId!);
+        // }
+        // if (item.id.kind == 'youtube#playlist') {
+        //   dListNotifier.setPlaylist(
+        //       MyPlaylist(
+        //           item.id.playlistId ?? '',
+        //           item.snippet!.title,
+        //           item.snippet?.description ?? '',
+        //           item.snippet?.thumbnails.high?.url ?? ''),
+        //       playlistItems);
+        // }
       },
       child: Container(
           color: Colors.black12,

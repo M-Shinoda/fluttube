@@ -12,15 +12,12 @@ class YoutubeMyPlaylist extends HookConsumerWidget {
   @override
   build(BuildContext context, WidgetRef ref) {
     final dListNotifier = ref.read(downloadListProvider.notifier);
-    final playlistItems = useState<List<MyPlaylistItem>>([]);
     final _playlistsSnapshot =
         useMemoized(() => getMyChannelPlaylistOnlyPublic(), const []);
     final playlistsSnapshot = useFuture(_playlistsSnapshot);
 
     final onTapCard = useCallback(
-        (MyPlaylist playlist,
-                ValueNotifier<List<MyPlaylistItem>> playlistItems) async =>
-            dListNotifier.setPlaylist(playlist, playlistItems),
+        (MyPlaylist playlist) async => dListNotifier.setPlaylist(playlist.id),
         const []);
 
     return SafeArea(
@@ -29,7 +26,7 @@ class YoutubeMyPlaylist extends HookConsumerWidget {
             child: Column(
                 children: (playlistsSnapshot.data ?? [])
                     .map((playlist) => InkWell(
-                        onTap: () => onTapCard(playlist, playlistItems),
+                        onTap: () => onTapCard(playlist),
                         child: Card(
                             child: Container(
                                 height: 50,

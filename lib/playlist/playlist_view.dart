@@ -6,7 +6,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path/path.dart';
 
 import '../audio/page_manager.dart';
-import '../models/youtube_model.dart';
 import '../services/playlist_repository.dart';
 import '../services/service_locator.dart';
 
@@ -16,7 +15,6 @@ class PlaylisView extends HookConsumerWidget {
   @override
   build(BuildContext context, WidgetRef ref) {
     final dListNotifier = ref.read(downloadListProvider.notifier);
-    final playlistItems = useState<List<MyPlaylistItem>>([]);
     final _playlistsCard = useMemoized(() async {
       final playlists = FileManager().getDirPFileList();
       return playlists.map((playlist) => InkWell(
@@ -53,9 +51,7 @@ class PlaylisView extends HookConsumerWidget {
                             final playlistId = basename(playlistFile.path)
                                 .replaceFirst('.txt', '');
 
-                            dListNotifier.setPlaylist(
-                                MyPlaylist(playlistId, '', '', ''),
-                                playlistItems,
+                            dListNotifier.setPlaylist(playlistId,
                                 isWriteCache: false);
                           }
                         },

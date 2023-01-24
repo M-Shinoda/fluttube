@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final textFieldUrlProvider =
-    StateNotifierProvider<TextFieldUrlStateNotifier, String>((_) {
-  return TextFieldUrlStateNotifier();
+    StateNotifierProvider<TextFieldDownloadStateNotifier, String>((_) {
+  return TextFieldDownloadStateNotifier();
 });
 
-class TextFieldUrlStateNotifier extends StateNotifier<String> {
-  TextFieldUrlStateNotifier() : super('');
+class TextFieldDownloadStateNotifier extends StateNotifier<String> {
+  TextFieldDownloadStateNotifier() : super('');
   void update(String url) => state = url;
 }

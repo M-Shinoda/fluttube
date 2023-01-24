@@ -42,6 +42,8 @@ dependencies:
   audio_service: ^0.18.7
   on_audio_edit: ^1.5.1
   yt: ^2.0.6+8
+  google_sign_in: ^5.4.2
+  loggy: ^2.0.3
 
 
 

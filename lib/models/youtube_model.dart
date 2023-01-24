@@ -1,3 +1,6 @@
+import 'package:yt/src/model/search/id.dart';
+import 'package:yt/yt.dart';
+
 import '../utils/file_manage.dart';
 
 enum ThumbnailsRes {
@@ -30,6 +33,10 @@ class MyPlaylistItem {
       : id = json['id'] ?? '',
         title = json['title'] ?? '';
 
+  MyPlaylistItem.fromPlaylistItem(PlaylistItem item)
+      : id = item.snippet!.resourceId.videoId,
+        title = item.snippet!.title;
+
   Map<String, dynamic> toJson() => {'id': id, 'title': title};
 }
 
@@ -47,6 +54,10 @@ class MyPlaylist {
             json['snippet']['localized']['title'] ?? '',
             json['snippet']['localized']['description'] ?? '',
             _choseThumbnailsRes(json, ThumbnailsRes.maxres));
+
+  MyPlaylist.fromPlaylist(Playlist p)
+      : this(p.id, p.snippet!.title, p.snippet!.description,
+            p.snippet!.thumbnails.thumbnailsDefault.url);
 }
 
 _choseThumbnailsRes(Map<String, dynamic> json, ThumbnailsRes res) {
@@ -55,4 +66,28 @@ _choseThumbnailsRes(Map<String, dynamic> json, ThumbnailsRes res) {
     return _choseThumbnailsRes(json, ThumbnailsRes.values[res.index - 1]);
   }
   return choseRes['url'];
+}
+
+enum ItemKind { video, playlist, channel, none }
+
+final Map<String, ItemKind> itemKindMap = {
+  'youtube#video': ItemKind.video,
+  'youtube#playlist': ItemKind.playlist,
+  'youtube#channel': ItemKind.channel,
+  '': ItemKind.none,
+};
+
+class ExtendsSearchResult extends SearchResult {
+  ItemKind _itemKind = ItemKind.none;
+
+  ExtendsSearchResult(SearchResult item)
+      : super(
+            kind: item.kind,
+            etag: item.etag,
+            id: item.id,
+            snippet: item.snippet) {
+    _itemKind = itemKindMap[id.kind] ?? ItemKind.none;
+  }
+
+  ItemKind get itemKind => _itemKind;
 }
