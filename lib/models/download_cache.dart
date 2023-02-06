@@ -11,6 +11,10 @@ class DownloadCache {
         date = DateTime.parse(json['date']),
         thumbnailUrl = json['thumbnailUrl'];
 
-  Map<String, dynamic> toJson() =>
-      {'id': id, 'name': name, 'date': date.toIso8601String()};
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'date': date.toIso8601String(),
+        'thumbnailUrl': thumbnailUrl
+      };
 }

@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttube/main.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
-import 'package:yt/yt.dart';
 
 import '../models/url_state.dart';
 import '../models/youtube_model.dart';
@@ -127,7 +126,7 @@ class DownloadListStateNotifier extends StateNotifier<List<DownloadState>> {
     await _download(file, id);
 
     _updateCompleted(id.value, true);
-    await FileManager().writeCache(
+    FileManager().writeCache(
         id.value, fileName, DateTime.now(), video.thumbnails.maxResUrl);
   }
 

@@ -100,8 +100,8 @@ class FileManager {
   }
 
   // キャッシュの読み込み
-  Future<List<DownloadCache>> readCache() async {
-    var cacheString = await _cacheFile.readAsString();
+  List<DownloadCache> readCache() {
+    var cacheString = _cacheFile.readAsStringSync();
     if (cacheString == '') cacheString = '[]';
     try {
       final cacheJson = json.decode(cacheString);
@@ -117,9 +117,8 @@ class FileManager {
   }
 
   // キャッシュの書き込み
-  Future<void> writeCache(
-      String id, String name, DateTime date, String thumbnailUrl) async {
-    final cacheList = await readCache();
+  void writeCache(String id, String name, DateTime date, String thumbnailUrl) {
+    final cacheList = readCache();
     cacheList.add(DownloadCache(id, name, date, thumbnailUrl));
     _cacheFile.writeAsString(json.encode(cacheList));
   }
