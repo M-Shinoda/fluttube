@@ -23,16 +23,17 @@ class YoutubeMyPlaylist extends HookConsumerWidget {
     return SafeArea(
         child: Container(
             padding: const EdgeInsets.all(16),
-            child: Column(
-                children: (playlistsSnapshot.data ?? [])
-                    .map((playlist) => InkWell(
-                        onTap: () => onTapCard(playlist),
-                        child: Card(
-                            child: Container(
-                                height: 50,
-                                width: double.maxFinite,
-                                alignment: Alignment.centerLeft,
-                                child: Text(playlist.title)))))
-                    .toList())));
+            child: SingleChildScrollView(
+                child: Column(
+                    children: (playlistsSnapshot.data ?? [])
+                        .map((playlist) => InkWell(
+                            onTap: () => onTapCard(playlist),
+                            child: Card(
+                                child: Container(
+                                    height: 50,
+                                    width: double.maxFinite,
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(playlist.title)))))
+                        .toList()))));
   }
 }
