@@ -98,9 +98,16 @@ class DownloadListStateNotifier extends StateNotifier<List<DownloadState>> {
     }
   }
 
-  Future<void> _download(File file, VideoId id) async {
+  Future<bool> _download(File file, VideoId id) async {
     final fileStream = file.openWrite();
-    final manifest = await yt.videos.streamsClient.getManifest(id);
+    StreamManifest manifest;
+    try {
+      manifest = await yt.videos.streamsClient.getManifest(id);
+    } catch (e) {
+      print(e);
+      file.deleteSync();
+      return false;
+    }
     final audio = manifest.audioOnly.firstWhere((item) => item.tag == 140);
     var bytes = audio.size.totalBytes;
     final audioStream = yt.videos.streamsClient.get(audio);
@@ -115,6 +122,7 @@ class DownloadListStateNotifier extends StateNotifier<List<DownloadState>> {
     }
     await fileStream.flush();
     await fileStream.close();
+    return true;
   }
 
   Future<void> downloadProc(String stringId, List<DownloadState> status) async {
@@ -123,8 +131,8 @@ class DownloadListStateNotifier extends StateNotifier<List<DownloadState>> {
     final fileName = FileManager().composeFileNameAndExt(video.title);
     var filePath = FileManager().dirMJoin(fileName);
     var file = File(filePath);
-    await _download(file, id);
-
+    final result = await _download(file, id);
+    if (!result) return;
     _updateCompleted(id.value, true);
     FileManager().writeCache(
         id.value, fileName, DateTime.now(), video.thumbnails.maxResUrl);
