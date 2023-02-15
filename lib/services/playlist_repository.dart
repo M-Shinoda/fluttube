@@ -37,11 +37,12 @@ class DemoPlaylist extends PlaylistRepository {
       'title': title,
       'album': 'SoundHelix',
       'url': path,
-      'thumbnailUrl': cacheList
-          .firstWhere((cache) => cache.name == title,
-              orElse: () => DownloadCache('', '', DateTime.now(),
-                  'https://i.ytimg.com/vi/e1xCOsgWG0M/mqdefault.jpg')) // ダミーを返す
-          .thumbnailUrl
+      'thumbnailUrl': FileManager().readThumbnail(title)
+      //  cacheList
+      //     .firstWhere((cache) => cache.name == title,
+      //         orElse: () => DownloadCache('', '', DateTime.now(),
+      //             'https://i.ytimg.com/vi/e1xCOsgWG0M/mqdefault.jpg')) // ダミーを返す
+      //     .thumbnailUrl
     };
   }
 

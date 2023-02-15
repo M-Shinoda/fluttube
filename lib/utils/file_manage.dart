@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:downloads_path_provider/downloads_path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
 
 import '../models/download_cache.dart';
 import '../models/youtube_model.dart';
@@ -14,11 +15,13 @@ class FileManager {
   static late String _musicFolderName;
   static late String _playlistSaveFolderName;
   static late String _cacheFolderName;
+  static late String _thumbnailFolderName;
 
   static late Directory _dir;
   static late Directory _dirM;
   static late File _cacheFile;
   static late Directory _dirP;
+  static late Directory _dirT;
 
   final String _cacheFileName = 'cache.txt';
 
@@ -32,10 +35,12 @@ class FileManager {
   Future<void> init(
       {required String musicFolderName,
       required String playlistSaveFolderName,
-      required String cacheFolderName}) async {
+      required String cacheFolderName,
+      required String thumbnailFolderName}) async {
     _musicFolderName = musicFolderName;
     _playlistSaveFolderName = playlistSaveFolderName;
     _cacheFolderName = cacheFolderName;
+    _thumbnailFolderName = thumbnailFolderName;
 
     await Permission.storage.request();
     _dir = await DownloadsPathProvider.downloadsDirectory;
@@ -48,6 +53,8 @@ class FileManager {
                 .uri
                 .toFilePath() +
             _cacheFileName)
+        .create(recursive: true);
+    _dirT = await Directory(_dir.uri.toFilePath() + _thumbnailFolderName)
         .create(recursive: true);
   }
 
@@ -133,5 +140,17 @@ class FileManager {
 
   List<FileSystemEntity> getDirPFileList() {
     return _dirP.listSync();
+  }
+
+  Future<void> writeThumbnail(String name, String thumbnailUrl) async {
+    final res = await http.get(Uri.parse(thumbnailUrl));
+    final file = File(_dirT.path + '/' + name + '.png');
+    file.create();
+    file.writeAsBytesSync(res.bodyBytes);
+  }
+
+  String readThumbnail(String name) {
+    final file = File(_dirT.path + '/' + name + '.png');
+    return file.path;
   }
 }

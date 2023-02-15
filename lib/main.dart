@@ -47,7 +47,8 @@ class MyApp extends HookConsumerWidget {
         await FileManager().init(
             musicFolderName: 'Music',
             playlistSaveFolderName: 'Playlist',
-            cacheFolderName: 'Cache');
+            cacheFolderName: 'Cache',
+            thumbnailFolderName: 'Thumbnail');
 
         sharingUrlProc(dListNotifier);
         getIt<PageManager>().init();
