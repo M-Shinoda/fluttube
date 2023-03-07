@@ -142,6 +142,10 @@ class FileManager {
     return _dirP.listSync();
   }
 
+  List<FileSystemEntity> getDirTFileList() {
+    return _dirT.listSync();
+  }
+
   Future<void> writeThumbnail(String name, String thumbnailUrl) async {
     final res = await http.get(Uri.parse(thumbnailUrl));
     final file = File(_dirT.path + '/' + name + '.png');
