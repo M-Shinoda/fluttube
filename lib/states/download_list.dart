@@ -133,7 +133,7 @@ class DownloadListStateNotifier extends StateNotifier<List<DownloadState>> {
     var file = File(filePath);
     final result = await _download(file, id);
     if (!result) return;
-    FileManager().writeThumbnail(fileName, video.thumbnails.maxResUrl);
+    await FileManager().writeThumbnail(fileName, video.thumbnails.maxResUrl);
     _updateCompleted(id.value, true);
     FileManager().writeCache(
         id.value, fileName, DateTime.now(), video.thumbnails.maxResUrl);
