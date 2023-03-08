@@ -134,6 +134,10 @@ class FileManager {
     return path.join(_dirM.path, fileName);
   }
 
+  String dirTJoin(String fileName) {
+    return path.join(_dirT.path, fileName);
+  }
+
   List<FileSystemEntity> getDirMFileList() {
     return _dirM.listSync();
   }
