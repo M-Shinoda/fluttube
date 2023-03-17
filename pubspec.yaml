@@ -46,6 +46,7 @@ dependencies:
   loggy: ^2.0.3
   image: ^4.0.15
   ffmpeg_kit_flutter_audio: ^5.1.0
+  android_content_provider: ^0.3.0
 
 
 
