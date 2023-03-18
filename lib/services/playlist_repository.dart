@@ -1,52 +1,44 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:fluttube/models/content_manager.dart';
 import 'package:fluttube/utils/file_manage.dart';
-import 'package:path/path.dart';
 
 abstract class PlaylistRepository {
-  Future<List<Map<String, String>>> fetchInitialPlaylist();
-  Future<Map<String, String>> fetchAnotherSong();
+  Future<List<MediaItem>> fetchInitialPlaylist();
+  Future<MediaItem> fetchAnotherSong();
   Future<List<MediaItem>> fetchAnotherPlaylist(String playlistId);
 }
 
 class DemoPlaylist extends PlaylistRepository {
   @override
-  Future<List<Map<String, String>>> fetchInitialPlaylist(
-      {int length = 1}) async {
-    length = FileManager().getDirMFileList().length;
+  Future<List<MediaItem>> fetchInitialPlaylist({int length = 1}) async {
+    length = await ContentManager().getSongCount();
+    List<MediaItem> songs = [];
+    for (int i = 0; i < length; i++) {
+      songs.add(await _nextSong());
+    }
 
-    return List.generate(length, (index) => _nextSong());
+    return songs;
   }
 
   @override
-  Future<Map<String, String>> fetchAnotherSong() async {
-    return _nextSong();
+  Future<MediaItem> fetchAnotherSong() async {
+    return await _nextSong();
   }
 
   var _songIndex = 0;
-  var list = FileManager().getDirMFileList();
 
-  Map<String, String> _nextSong() {
-    print(list.toString());
-    final path = list[_songIndex].path;
-    final title = basename(path);
-    _songIndex = (_songIndex % list.length) + 1;
-    return {
-      'id': _songIndex.toString().padLeft(3, '0'),
-      'title': title,
-      'album': 'SoundHelix',
-      'url': path,
-      'thumbnailUrl': 'https://i.ytimg.com/vi/e1xCOsgWG0M/mqdefault.jpg'
-    };
+  Future<MediaItem> _nextSong() async {
+    final songs = await ContentManager().fetchSongs();
+    final song = songs![_songIndex];
+    _songIndex += 1;
+    return song.toMediaItem();
   }
 
   @override
   Future<List<MediaItem>> fetchAnotherPlaylist(String playlistId) async {
-    // final list = dirM.listSync();
     final playlistItem = await FileManager().readPlaylist(playlistId);
     List<MediaItem> items = [];
     playlistItem.asMap().forEach((index, item) {
-      // final playlistFile =
-      //     list.firstWhere((file) => basename(file.path) == item.title + '.mp3');
       items.add(MediaItem(
           id: index.toString().padLeft(3, '0'),
           album: 'SoundHelix',

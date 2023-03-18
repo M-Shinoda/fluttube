@@ -1,7 +1,6 @@
-class UrlState {
-  int id;
-  String url;
+class DownloadState {
+  String id;
   bool completed;
   double progress;
-  UrlState(this.id, this.url, this.completed, this.progress);
+  DownloadState(this.id, this.completed, this.progress);
 }

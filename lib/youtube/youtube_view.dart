@@ -1,15 +1,17 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:fluttube/youtube/youtube_my_playlist.dart';
+import 'package:fluttube/main.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:youtube_api/youtube_api.dart';
+import 'package:yt/yt.dart';
 
+import '../models/youtube_model.dart';
 import '../states/download_list.dart';
+import '../utils/youtube_api.dart';
 import 'suggest_text_view.dart';
 
 String key = 'AIzaSyAM2qP2XwtD5-9C0q7F5mtCnTuk2VCn1xA';
-YoutubeAPI ytApi = YoutubeAPI(key, maxResults: 30);
-List<YouTubeVideo> videoResult = [];
 
 class YoutubeView extends HookConsumerWidget {
   const YoutubeView({Key? key}) : super(key: key);
@@ -24,7 +26,6 @@ class YoutubeView extends HookConsumerWidget {
     final searchVideo = useState(false);
     final searchPlaylist = useState(true);
     final searchChannel = useState(false);
-    final playlistItems = useState<List<PlaylistItem>>([]);
 
     final searchType = useMemoized(() {
       List<String> type = [];
@@ -38,7 +39,8 @@ class YoutubeView extends HookConsumerWidget {
 
     final searchSnapshot = useMemoized(
         () async => searchText.value != ''
-            ? await ytApi.search(searchText.value, type: searchType)
+            ? await ytApi.search
+                .list(q: searchText.value, type: searchType, maxResults: 10)
             : null,
         [searchText.value, searchType]);
     final searchResult = useFuture(searchSnapshot);
@@ -76,13 +78,6 @@ class YoutubeView extends HookConsumerWidget {
         return Container();
       }
     }, [suggestSearch.value, isVisibleSuggestText.value]);
-
-    // useEffect(() {
-    //   Future.delayed(Duration.zero, () async {
-    //     final a = await ytApi.nextPage();
-    //     inspect(a);
-    //   });
-    // }, [searchResult.data]);
 
     Widget _searchTextField() {
       return Container(
@@ -130,8 +125,8 @@ class YoutubeView extends HookConsumerWidget {
         SingleChildScrollView(
             child: Column(children: [
           if (searchResult.hasData)
-            ...searchResult.data!
-                .map((item) => videoCard(item, dListNotifier, playlistItems))
+            ...searchResult.data!.items.map(
+                (item) => videoCard(ExtendsSearchResult(item), dListNotifier))
         ])),
         _suggestList()
       ]))
@@ -139,34 +134,41 @@ class YoutubeView extends HookConsumerWidget {
   }
 }
 
-Widget videoCard(YouTubeVideo item, DownloadListStateNotifier dListNotifier,
-    ValueNotifier<List<PlaylistItem>> playlistItems) {
+Widget videoCard(
+  ExtendsSearchResult item,
+  DownloadListStateNotifier dListNotifier,
+) {
+  inspect(item);
   return GestureDetector(
       onTap: () {
-        if (item.kind == 'video') dListNotifier.setUrl(item.url);
-        if (item.kind == 'playlist') {
-          dListNotifier.setPlaylist(
-              MyPlaylist(item.id ?? '', item.title, item.description ?? '',
-                  item.thumbnail.high.url ?? ''),
-              playlistItems);
+        if (item.itemKind == ItemKind.channel) return;
+        if (item.itemKind == ItemKind.none) return;
+
+        if (item.itemKind == ItemKind.playlist ||
+            item.itemKind == ItemKind.video) {
+          dListNotifier.setSearchResult(item);
         }
 
-        if (item.kind == 'channel') return;
+        // if (item.id.kind == 'youtube#video') {
+        //   dListNotifier.setId(item.id.videoId!);
+        // }
+        // if (item.id.kind == 'youtube#playlist') {
+        //   dListNotifier.setPlaylist(
+        //       MyPlaylist(
+        //           item.id.playlistId ?? '',
+        //           item.snippet!.title,
+        //           item.snippet?.description ?? '',
+        //           item.snippet?.thumbnails.high?.url ?? ''),
+        //       playlistItems);
+        // }
       },
       child: Container(
           color: Colors.black12,
           margin: const EdgeInsets.all(10),
           child: Row(children: [
-            Image.network(item.thumbnail.medium.url!, width: 70),
-            Expanded(child: Text(item.title, overflow: TextOverflow.ellipsis))
+            Image.network(item.snippet!.thumbnails.medium!.url, width: 70),
+            Expanded(
+                child:
+                    Text(item.snippet!.title, overflow: TextOverflow.ellipsis))
           ])));
-}
-
-Widget suggestTextContent(String suggest) {
-  return Container(
-      height: 20,
-      decoration: const BoxDecoration(
-          color: Colors.white60,
-          borderRadius: BorderRadius.all(Radius.circular(30))),
-      child: Text(suggest));
 }

@@ -1,90 +1,82 @@
 import 'dart:collection';
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
+import 'package:fluttube/main.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import '../models/url_state.dart';
+import '../models/youtube_model.dart';
 import '../utils/file_manage.dart';
-import '../youtube/youtube_my_playlist.dart';
 
 final downloadListProvider =
-    StateNotifierProvider<DownloadListStateNotifier, List<UrlState>>((_) {
+    StateNotifierProvider<DownloadListStateNotifier, List<DownloadState>>((_) {
   return DownloadListStateNotifier();
 });
 
-var downloadQueue = Queue<int>();
+var downloadQueue = Queue<String>();
 var semaphore = false;
 
-class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
+class DownloadListStateNotifier extends StateNotifier<List<DownloadState>> {
   DownloadListStateNotifier() : super([]);
 
-  int _id = 0;
   final yt = YoutubeExplode();
 
-  void _changeStateObject(List<UrlState> newState) {
+  void _changeStateObject(List<DownloadState> newState) {
     state = [...newState];
   }
 
-  void _addState(UrlState urlState) {
-    state.add(urlState);
+  void _addState(DownloadState downloadState) {
+    state.add(downloadState);
     _changeStateObject(state);
   }
 
-  void _updateProgress(int index, double progress) {
-    state[index].progress = progress;
+  void _updateProgress(String targetId, double progress) {
+    state.firstWhere((id) => id.id == targetId).progress = progress;
     _changeStateObject(state);
   }
 
-  void _updateCompleted(int index, bool completed) {
-    state[index].completed = completed;
+  void _updateCompleted(String targetId, bool completed) {
+    state.firstWhere((id) => id.id == targetId).completed = completed;
     _changeStateObject(state);
   }
 
+  // 共有機能から来たURLからIDを抽出（基本これは使わない）
   void setUrl(String url) {
-    _addState(UrlState(_id, url, false, 0.0));
-    downloadQueue.add(_id);
+    setVideoId(VideoId(url).value);
+  }
+
+  void setVideoId(String id) async {
+    _addState(DownloadState(id, false, 0.0));
+    downloadQueue.add(id);
     _executeQueue();
-    _id++;
   }
 
-  void setId(String id) async {
-    var video = await yt.videos.get(id);
-    setUrl(video.url);
-  }
-
-  void setPlaylist(
-      MyPlaylist playlist, ValueNotifier<List<PlaylistItem>> playlistItems,
-      {bool isWriteCache = true}) async {
-    final res = await http.get(Uri.parse(
-        'https://www.googleapis.com/youtube/v3/playlistItems?key=AIzaSyCnIYbi-SOIJfaX4bm2JFJtC21dpCu_10Q&part=snippet,contentDetails,status,id&playlistId=${playlist.id}&maxResults=100'));
-
-    final json = jsonDecode(utf8.decode(res.bodyBytes));
-
-    playlistItems.value = (json['items'] as List<dynamic>)
-        .map((item) => PlaylistItem.fromJson(item))
-        .toList();
-    inspect(playlistItems.value);
-    inspect(json);
+  void setPlaylist(String playListId, {bool isWriteCache = true}) async {
     var removeIndexlist = [];
-    playlistItems.value.asMap().forEach((index, item) {
+    final playlistItemListRes = await ytApi.playlistItems.list(
+        part: 'id,snippet,contentDetails,status',
+        playlistId: playListId,
+        maxResults: 200);
+
+    final myPlaylistItems = playlistItemListRes.items
+        .map((playListItem) => MyPlaylistItem.fromPlaylistItem(playListItem))
+        .toList();
+
+    myPlaylistItems.asMap().forEach((index, item) {
       print(item.id);
       print(item.title);
-      if (item.title != 'Deleted video.mp3') {
-        setId(item.id);
+      if (item.title != 'Deleted video') {
+        setVideoId(item.id);
       } else {
         removeIndexlist.add(index);
       }
     });
     for (var index in removeIndexlist) {
-      playlistItems.value.removeAt(index);
+      myPlaylistItems.removeAt(index);
     }
     if (isWriteCache) {
-      FileManager().writePlaylist(playlist.id, playlistItems.value);
+      FileManager().writePlaylist(playListId, myPlaylistItems);
     }
   }
 
@@ -106,9 +98,16 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
     }
   }
 
-  Future<void> _download(File file, VideoId id, int index) async {
+  Future<bool> _download(File file, VideoId id) async {
     final fileStream = file.openWrite();
-    final manifest = await yt.videos.streamsClient.getManifest(id);
+    StreamManifest manifest;
+    try {
+      manifest = await yt.videos.streamsClient.getManifest(id);
+    } catch (e) {
+      print(e);
+      file.deleteSync();
+      return false;
+    }
     final audio = manifest.audioOnly.firstWhere((item) => item.tag == 140);
     var bytes = audio.size.totalBytes;
     final audioStream = yt.videos.streamsClient.get(audio);
@@ -118,23 +117,39 @@ class DownloadListStateNotifier extends StateNotifier<List<UrlState>> {
       count += data.length;
 
       progress = count / bytes;
-      _updateProgress(index, progress);
+      _updateProgress(id.value, progress);
       fileStream.add(data);
     }
     await fileStream.flush();
     await fileStream.close();
+    return true;
   }
 
-  Future<void> downloadProc(int index, List<UrlState> status) async {
-    final id = VideoId(status[index].url);
+  Future<void> downloadProc(String stringId, List<DownloadState> status) async {
+    final id = VideoId(stringId);
     final video = await yt.videos.get(id);
     final fileName = FileManager().composeFileNameAndExt(video.title);
     var filePath = FileManager().dirMJoin(fileName);
     var file = File(filePath);
-    await _download(file, id, index);
+    final result = await _download(file, id);
+    if (!result) return;
+    await FileManager().writeThumbnail(fileName, video.thumbnails.maxResUrl);
+    _updateCompleted(id.value, true);
+    FileManager().writeCache(
+        id.value, fileName, DateTime.now(), video.thumbnails.maxResUrl);
+  }
 
-    _updateCompleted(index, true);
-    await FileManager().writeCache(index, status[index].url, fileName,
-        DateTime.now(), video.thumbnails.maxResUrl);
+  Future<void> setSearchResult(ExtendsSearchResult item) async {
+    if (item.itemKind == ItemKind.playlist) {
+      final playlistRes = await ytApi.playlists.list(id: item.id.playlistId);
+      // idを指定しているため、1つ以下ののプレイリストが返ってくる
+      final playlist = MyPlaylist.fromPlaylist(playlistRes.items.first);
+      setPlaylist(playlist.id);
+    }
+    if (item.itemKind == ItemKind.video) {
+      final videoRes = await ytApi.videos.list(id: item.id.videoId);
+      inspect(videoRes);
+      setVideoId(item.id.videoId!);
+    }
   }
 }

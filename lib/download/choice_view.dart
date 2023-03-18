@@ -40,8 +40,9 @@ class ChoiceView extends HookConsumerWidget {
     return Column(children: <Widget>[
       Expanded(
           child: !choice.complete
-              ? ListCard(
-                  items: [...dList.where((urlState) => !urlState.completed)])
+              ? ListCard(items: [
+                  ...dList.where((DownloadState) => !DownloadState.completed)
+                ])
               : fetchCache.data != null
                   ? ListCacheCard(caches: [...fetchCache.data!.reversed])
                   : Container())

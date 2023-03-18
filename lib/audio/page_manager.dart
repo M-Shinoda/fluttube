@@ -33,16 +33,7 @@ class PageManager {
   Future<void> _loadPlaylist() async {
     final songRepository = getIt<PlaylistRepository>();
     final playlist = await songRepository.fetchInitialPlaylist();
-    final mediaItems = playlist
-        .map((song) => MediaItem(
-              id: song['id'] ?? '',
-              album: song['album'] ?? '',
-              title: song['title'] ?? '',
-              extras: {'url': song['url']},
-              artUri: Uri.parse(song['thumbnailUrl'] ?? ''),
-            ))
-        .toList();
-    await _audioHandler.addQueueItems(mediaItems);
+    await _audioHandler.addQueueItems(playlist);
   }
 
   void _listenToChangesInPlaylist() {
@@ -162,14 +153,7 @@ class PageManager {
   void add() async {
     final songRepository = getIt<PlaylistRepository>();
     final song = await songRepository.fetchAnotherSong();
-    final mediaItem = MediaItem(
-      id: song['id'] ?? '',
-      album: song['album'] ?? '',
-      title: song['title'] ?? '',
-      extras: {'url': song['url']},
-      artUri: Uri.parse(song['thumbnailUrl'] ?? ''),
-    );
-    _audioHandler.addQueueItem(mediaItem);
+    _audioHandler.addQueueItem(song);
   }
 
   void remove() {

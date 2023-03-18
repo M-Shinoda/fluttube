@@ -5,7 +5,7 @@ import '../models/download_cache.dart';
 import '../models/url_state.dart';
 
 class ListCard extends HookWidget {
-  final List<UrlState> items;
+  final List<DownloadState> items;
   const ListCard({Key? key, required this.items}) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class ListCard extends HookWidget {
           child: ListTile(
             leading: const Icon(Icons.people),
             title: Text(
-              item.url.toString() + " : " + item.completed.toString(),
+              item.id.toString() + " : " + item.completed.toString(),
               style: const TextStyle(
                 overflow: TextOverflow.ellipsis,
               ),

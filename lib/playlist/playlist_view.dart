@@ -8,7 +8,6 @@ import 'package:path/path.dart';
 import '../audio/page_manager.dart';
 import '../services/playlist_repository.dart';
 import '../services/service_locator.dart';
-import '../youtube/youtube_my_playlist.dart';
 
 class PlaylisView extends HookConsumerWidget {
   const PlaylisView({Key? key}) : super(key: key);
@@ -16,15 +15,12 @@ class PlaylisView extends HookConsumerWidget {
   @override
   build(BuildContext context, WidgetRef ref) {
     final dListNotifier = ref.read(downloadListProvider.notifier);
-    final playlistItems = useState<List<PlaylistItem>>([]);
     final _playlistsCard = useMemoized(() async {
       final playlists = FileManager().getDirPFileList();
       return playlists.map((playlist) => InkWell(
           onTap: () async {
-            final songRepository = getIt<PlaylistRepository>();
-            final pageManager = getIt<PageManager>();
-            pageManager.switchingPlaylist(
-                await songRepository.fetchAnotherPlaylist(
+            getIt<PageManager>().switchingPlaylist(
+                await getIt<PlaylistRepository>().fetchAnotherPlaylist(
                     basename(playlist.path).replaceFirst('.txt', '')));
           },
           child: Card(
@@ -55,9 +51,7 @@ class PlaylisView extends HookConsumerWidget {
                             final playlistId = basename(playlistFile.path)
                                 .replaceFirst('.txt', '');
 
-                            dListNotifier.setPlaylist(
-                                MyPlaylist(playlistId, '', '', ''),
-                                playlistItems,
+                            dListNotifier.setPlaylist(playlistId,
                                 isWriteCache: false);
                           }
                         },
