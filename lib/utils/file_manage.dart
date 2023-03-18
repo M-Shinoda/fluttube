@@ -3,6 +3,8 @@ import 'dart:io';
 
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:downloads_path_provider/downloads_path_provider.dart';
+import 'package:ffmpeg_kit_flutter_audio/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_audio/return_code.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
@@ -72,7 +74,7 @@ class FileManager {
   }
 
   String composeFileNameAndExt(String title) {
-    return composeFileName(title) + '.mp3';
+    return composeFileName(title) + '.mp4';
   }
 
   // プレイリスト一覧を読み込む
@@ -134,6 +136,10 @@ class FileManager {
     return path.join(_dirM.path, fileName);
   }
 
+  String dirTJoin(String fileName) {
+    return path.join(_dirT.path, fileName);
+  }
+
   List<FileSystemEntity> getDirMFileList() {
     return _dirM.listSync();
   }
@@ -151,6 +157,62 @@ class FileManager {
     final file = File(_dirT.path + '/' + name + '.png');
     file.create();
     file.writeAsBytesSync(res.bodyBytes);
+
+    await changeCodecAndAttachCoverArt(file, File(_dirM.path + '/' + name));
+  }
+
+  Future<void> changeCodecAndAttachCoverArt(
+      File imageFile, File audioFile) async {
+    final tempAudioFilePath =
+        audioFile.path.substring(0, audioFile.path.length - 4) + 'copy.mp3';
+
+    var result = false;
+    result = await toMp3Codec(audioFile, tempAudioFilePath);
+    if (!result) return;
+
+    result =
+        await attachAudioFileCoverArt(audioFile, imageFile, tempAudioFilePath);
+    if (!result) return;
+
+    File(tempAudioFilePath).deleteSync();
+  }
+
+  Future<bool> toMp3Codec(File audioFile, String tempAudioFilePath) async {
+    var result = false;
+    final ffmpegCommand =
+        '-i "${audioFile.path}" -c:a libmp3lame -vn -b:a 129k "$tempAudioFilePath"';
+    await FFmpegKit.execute(ffmpegCommand).then((session) async {
+      final returnCode = await session.getReturnCode();
+      result = ReturnCode.isSuccess(returnCode);
+    });
+    if (!result) {
+      return false;
+    } else {
+      audioFile.deleteSync();
+      return true;
+    }
+  }
+
+  Future<bool> attachAudioFileCoverArt(
+      File audioFile, File imageFile, String tempAudioFilePath) async {
+    var result = false;
+    final ffmpegCommand =
+        '-i "$tempAudioFilePath" -i "${imageFile.path}" -map 0 -map 1 -c copy -c:v:1 png -disposition:v:1 attached_pic -id3v2_version 3 "${audioFile.path.substring(0, audioFile.path.length - 4) + '.mp3'}"';
+    await FFmpegKit.execute(ffmpegCommand).then((session) async {
+      final returnCode = await session.getReturnCode();
+      result = ReturnCode.isSuccess(returnCode);
+    });
+    if (result) {
+      imageFile.deleteSync();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  Future<void> changeFileNameOnly(File file, String newFileName) async {
+    final dirPath = path.dirname(file.path);
+    await file.rename(dirPath + '/' + newFileName);
   }
 
   String readThumbnail(String name) {

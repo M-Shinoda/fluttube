@@ -9,6 +9,7 @@ import 'package:yt/yt.dart';
 
 import 'audio/page_manager.dart';
 import 'components/utils.dart';
+import 'models/content_manager.dart';
 import 'navigation_bottom_bar/bottom_view.dart';
 import 'services/service_locator.dart';
 import 'states/download_list.dart';
@@ -49,6 +50,7 @@ class MyApp extends HookConsumerWidget {
             playlistSaveFolderName: 'Playlist',
             cacheFolderName: 'Cache',
             thumbnailFolderName: 'Thumbnail');
+        await ContentManager().init();
 
         sharingUrlProc(dListNotifier);
         getIt<PageManager>().init();

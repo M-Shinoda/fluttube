@@ -38,13 +38,15 @@ dependencies:
   flutter_hooks: ^0.18.2
   get_it: ^7.2.0
   audio_video_progress_bar: ^0.10.0
-  just_audio: ^0.9.28
-  audio_service: ^0.18.7
+  just_audio: ^0.9.31
+  audio_service: ^0.18.9
   on_audio_edit: ^1.5.1
   yt: ^2.0.6+8
   google_sign_in: ^5.4.2
   loggy: ^2.0.3
   image: ^4.0.15
+  ffmpeg_kit_flutter_audio: ^5.1.0
+  android_content_provider: ^0.3.0
 
 
 
