@@ -9,8 +9,8 @@ import '../services/service_locator.dart';
 
 class PageManager {
   // Listeners: Updates going to the UI
-  final currentSongTitleNotifier = ValueNotifier<String>('');
-  final playlistNotifier = ValueNotifier<List<String>>([]);
+  final currentSongNotifier = ValueNotifier<MediaItem?>(null);
+  final playlistNotifier = ValueNotifier<List<MediaItem>>([]);
   final progressNotifier = ProgressNotifier();
   final repeatButtonNotifier = RepeatButtonNotifier();
   final isFirstSongNotifier = ValueNotifier<bool>(true);
@@ -40,10 +40,9 @@ class PageManager {
     _audioHandler.queue.listen((playlist) {
       if (playlist.isEmpty) {
         playlistNotifier.value = [];
-        currentSongTitleNotifier.value = '';
+        currentSongNotifier.value = null;
       } else {
-        final newList = playlist.map((item) => item.title).toList();
-        playlistNotifier.value = newList;
+        playlistNotifier.value = playlist;
       }
       _updateSkipButtons();
     });
@@ -102,7 +101,7 @@ class PageManager {
 
   void _listenToChangesInSong() {
     _audioHandler.mediaItem.listen((mediaItem) {
-      currentSongTitleNotifier.value = mediaItem?.title ?? '';
+      currentSongNotifier.value = mediaItem;
       _updateSkipButtons();
     });
   }
