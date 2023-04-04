@@ -3,15 +3,18 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttube/services/service_locator.dart';
+import 'package:fluttube/utils/image_color_picker.dart';
 
 import 'audio/audio.dart';
 import 'audio/page_manager.dart';
 
-class FloatingPlayer extends StatelessWidget {
+class FloatingPlayer extends HookWidget {
   const FloatingPlayer({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final artColor = useState<Color?>(null);
+
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
@@ -24,17 +27,20 @@ class FloatingPlayer extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-            color: Colors.grey, borderRadius: BorderRadius.circular(10)),
+            color: artColor.value?.withAlpha(200) ?? Colors.grey,
+            borderRadius: BorderRadius.circular(10)),
         height: 50,
         margin: const EdgeInsets.symmetric(horizontal: 15),
         child: Row(
-          children: const [
+          children: [
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: CurrentArt(),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: CurrentArt(
+                artColor: artColor,
+              ),
             ),
-            CurrentTitle(),
-            Align(
+            const CurrentTitle(),
+            const Align(
               alignment: Alignment.centerRight,
               child: AudioControlButtons(),
             ),
@@ -83,7 +89,8 @@ class AudioControlButtons extends StatelessWidget {
 }
 
 class CurrentArt extends HookWidget {
-  const CurrentArt({Key? key}) : super(key: key);
+  final ValueNotifier<Color?>? artColor;
+  const CurrentArt({this.artColor, Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     final currentMediaItem = useState<MediaItem?>(null);
@@ -119,6 +126,7 @@ class CurrentArt extends HookWidget {
         height: cacheSize,
         cancellationSignal: _loadSignal.value,
       );
+      artColor?.value = ImageColorPicker.fromBytes(bytes).frequentColor;
       return Image.memory(bytes, cacheHeight: cacheSize, cacheWidth: cacheSize);
     }, [currentMediaItem.value]);
 
