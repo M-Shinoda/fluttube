@@ -1,8 +1,7 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:fluttube/utils/file_manage.dart';
-import 'package:fluttube/utils/image_color_picker.dart';
 
 import '../services/service_locator.dart';
 import '../notifiers/play_button_notifier.dart';
@@ -15,23 +14,15 @@ class AudioView extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageColorPicker = useState<ImageColorPicker?>(null);
-
-    useEffect(() {
-      final dirTFileList = FileManager().getDirTFileList();
-      imageColorPicker.value = ImageColorPicker.fromFile(dirTFileList[6].path);
-    }, []);
-
     return MaterialApp(
       home: Scaffold(
-        backgroundColor: imageColorPicker.value!.frequentColor,
         body: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: const [
               CurrentSongTitle(),
               Playlist(),
-              AddRemoveSongButtons(),
+              // AddRemoveSongButtons(),
               AudioProgressBar(),
               AudioControlButtons(),
             ],
@@ -47,12 +38,13 @@ class CurrentSongTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pageManager = getIt<PageManager>();
-    return ValueListenableBuilder<String>(
-      valueListenable: pageManager.currentSongTitleNotifier,
-      builder: (_, title, __) {
+    return ValueListenableBuilder<MediaItem?>(
+      valueListenable: pageManager.currentSongNotifier,
+      builder: (_, mediaItem, __) {
         return Padding(
           padding: const EdgeInsets.only(top: 8.0),
-          child: Text(title, style: const TextStyle(fontSize: 40)),
+          child: Text(mediaItem?.title ?? '',
+              style: const TextStyle(fontSize: 40)),
         );
       },
     );
@@ -65,14 +57,14 @@ class Playlist extends StatelessWidget {
   Widget build(BuildContext context) {
     final pageManager = getIt<PageManager>();
     return Expanded(
-      child: ValueListenableBuilder<List<String>>(
+      child: ValueListenableBuilder<List<MediaItem>>(
         valueListenable: pageManager.playlistNotifier,
-        builder: (context, playlistTitles, _) {
+        builder: (context, playlistMediaItems, _) {
           return ListView.builder(
-            itemCount: playlistTitles.length,
+            itemCount: playlistMediaItems.length,
             itemBuilder: (context, index) {
               return ListTile(
-                title: Text(playlistTitles[index]),
+                title: Text(index.toString() + playlistMediaItems[index].title),
               );
             },
           );

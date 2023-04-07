@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:fluttube/floating_player.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../audio/audio.dart';
@@ -20,7 +21,7 @@ class BottomView extends HookConsumerWidget {
       const YoutubeMyPlaylist(),
       const AudioView(),
       const PlaylisView(),
-      const DownloadView()
+      const DownloadView(),
     ];
     final _currentIndex = useState(0);
     final _pageViewController = PageController();
@@ -39,11 +40,22 @@ class BottomView extends HookConsumerWidget {
     }, [dList]);
 
     return Scaffold(
-      body: PageView(
-        // physics: NeverScrollableScrollPhysics(),
-        controller: _pageViewController,
-        children: _pageWidget,
-        onPageChanged: (index) => _currentIndex.value = index,
+      body: Stack(
+        children: [
+          PageView(
+            // physics: NeverScrollableScrollPhysics(),
+            controller: _pageViewController,
+            children: _pageWidget,
+            onPageChanged: (index) => _currentIndex.value = index,
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 100),
+              child: const FloatingPlayer(),
+            ),
+          )
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex.value,

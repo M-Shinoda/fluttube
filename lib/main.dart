@@ -22,6 +22,12 @@ void main() async {
     statusBarColor: Color(0x00000000), // status bar color
     statusBarIconBrightness: Brightness.dark,
   ));
+  await FileManager().init(
+      musicFolderName: 'Music',
+      playlistSaveFolderName: 'Playlist',
+      cacheFolderName: 'Cache',
+      thumbnailFolderName: 'Thumbnail');
+  await ContentManager().init();
   runApp(
     const ProviderScope(
       child: MyApp(),
@@ -45,12 +51,6 @@ class MyApp extends HookConsumerWidget {
             stackTraceLevel: LogLevel.off,
           ),
         );
-        await FileManager().init(
-            musicFolderName: 'Music',
-            playlistSaveFolderName: 'Playlist',
-            cacheFolderName: 'Cache',
-            thumbnailFolderName: 'Thumbnail');
-        await ContentManager().init();
 
         sharingUrlProc(dListNotifier);
         getIt<PageManager>().init();
